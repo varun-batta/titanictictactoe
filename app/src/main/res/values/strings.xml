@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Titanic Tic Tac Toe</string>
+    <string name="app_id">15248927065</string>
+    <string name="tic">Tic</string>
+    <string name="tac">Tac</string>
+    <string name="toe">Toe</string>
+    <string name="instructions">Please enter      the player\'s names below:</string>
+    <string name="guide">This is the enhanced version of Tic-Tac-Toe. Enjoy!</string>
+    <string name="player1">Player 1</string>
+    <string name="player2">Player 2</string>
+
+</resources>

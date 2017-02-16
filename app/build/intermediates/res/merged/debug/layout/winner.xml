@@ -1,0 +1,33 @@
+<RelativeLayout 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical"
+    android:id="@+id/winnerLayout">
+    
+    <TextView
+        android:id="@+id/congrats"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+       	android:layout_centerInParent="true"
+       	android:gravity="center_horizontal">
+    </TextView>
+    
+    <LinearLayout
+    	android:id="@+id/bottomPanel"
+    	android:orientation="horizontal"
+    	android:layout_width="wrap_content"
+    	android:layout_height="wrap_content"
+        android:layout_below="@+id/congrats"
+        android:layout_centerHorizontal="true" />
+    
+    <LinearLayout
+        android:id="@+id/bottomPanel2"
+        android:orientation="horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/bottomPanel"
+        android:layout_centerHorizontal="true" />
+    
+</RelativeLayout>
