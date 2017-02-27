@@ -6,7 +6,7 @@ ADDED from C:\Users\varun\StudioProjects\TitanicTicTacToe\app\src\main\AndroidMa
 		INJECTED from C:\Users\varun\StudioProjects\TitanicTicTacToe\app\src\main\AndroidManifest.xml
 		INJECTED from C:\Users\varun\StudioProjects\TitanicTicTacToe\app\src\main\AndroidManifest.xml
 	android:versionName
-		ADDED from C:\Users\varun\StudioProjects\TitanicTicTacToe\app\src\main\AndroidManifest.xml:5:5-31
+		ADDED from C:\Users\varun\StudioProjects\TitanicTicTacToe\app\src\main\AndroidManifest.xml:5:5-33
 		INJECTED from C:\Users\varun\StudioProjects\TitanicTicTacToe\app\src\main\AndroidManifest.xml
 		INJECTED from C:\Users\varun\StudioProjects\TitanicTicTacToe\app\src\main\AndroidManifest.xml
 	android:versionCode

@@ -25,7 +25,7 @@
         jumboMode="true"
         optimize="true"
         revision="24.0.0"
-        sha1="9086c04d0200f32ac8b8617bef94a01f67016851">
+        sha1="cdd458af234d47d92b6efab106cb58bb4f8e9230">
         <dex dex="C:\Users\varun\StudioProjects\TitanicTicTacToe\app\build\intermediates\transforms\dex\debug\folders\1000\10\instant-run_036cd79423e7b3277a49b2e9d24cfce589abbb86\classes.dex" />
     </item>
     <item
@@ -223,7 +223,7 @@
         jumboMode="true"
         optimize="true"
         revision="24.0.0"
-        sha1="44182eb2b0ce08d5ec8f81a2fbd99a8377d99d03">
+        sha1="c2cf5bec902aba1bd35668d9a6023193df0d3741">
         <dex dex="C:\Users\varun\StudioProjects\TitanicTicTacToe\app\build\intermediates\transforms\dex\debug\folders\1000\10\instant-run-bootstrap_c3ec4c5243ea02d5046719cc44d6502a3a2ddf6e\classes.dex" />
     </item>
     <item

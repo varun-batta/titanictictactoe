@@ -671,6 +671,7 @@ public class Board extends Activity implements ConnectionCallbacks, OnConnection
 //				            		Log.d("UIT", "Called");
 //				            		boardAdapter.replace();
 //				            	}
+                                Log.d("done", "" + done);
 				            	if (!done) {
 					            	Log.d("Level", "" + level);
 					            	Log.d("receiving", "" + Index.receiving);

@@ -270,8 +270,8 @@ public class ButtonPressed implements OnClickListener {
 				
 				Log.d("Player 1", Board.player1);
 				Log.d("Player 2", Board.player2);
-				Log.d("pPId", Board.pendingPlayerId);
-                Log.d("cPId", Board.currentPlayerId);
+//				Log.d("pPId", Board.pendingPlayerId);
+//                Log.d("cPId", Board.currentPlayerId);
 
 				wincheck[wincheck.length-1][0] = Integer.toString(m);
 				wincheck[wincheck.length-1][1] = Integer.toString(f);
