@@ -59,6 +59,7 @@ public class LevelMenu extends Activity implements ConnectionCallbacks, OnConnec
 	String caller;
 	boolean instructions;
 	String levelChoice;
+    boolean reconnectOnce = true;
 	
 	// Request code to use when launching the resolution activity
     private static final int REQUEST_RESOLVE_ERROR = 1001;
@@ -100,8 +101,12 @@ public class LevelMenu extends Activity implements ConnectionCallbacks, OnConnec
 		instructions = getIntent().getBooleanExtra("Instructions", false);
 		
 		client = new GoogleApiClient.Builder(this)
-        .addApi(Games.API)
+        .addApi(Plus.API)
+        .addScope(Plus.SCOPE_PLUS_LOGIN)
+		.addApi(Games.API)
         .addScope(Games.SCOPE_GAMES)
+        .addApi(Drive.API)
+        .addScope(Drive.SCOPE_APPFOLDER)
         .addConnectionCallbacks(this)
         .addOnConnectionFailedListener(this)
         .build();
@@ -325,9 +330,9 @@ public class LevelMenu extends Activity implements ConnectionCallbacks, OnConnec
 			Board.keys = new Hashtable<Integer, Button>(6561);	
 			Board.bottomPanel.removeAllViews();
 			Board.boardLayout.removeAllViews();
-			ButtonPressed.wincheck = new String [82][81];
+			ButtonPressed.wincheck = new String [10][9];
 			ButtonPressed.metawincheck = new String [3][3];
-			Board.wincheck = new String [82][81];
+			Board.wincheck = new String [10][9];
 			ButtonPressed.currentTurn = "";
 		}
 		switch(levelChoice){
@@ -449,6 +454,8 @@ public class LevelMenu extends Activity implements ConnectionCallbacks, OnConnec
             final ArrayList<String> invitees =
                     data.getStringArrayListExtra(Games.EXTRA_PLAYER_IDS);
 
+			Log.d("Invitees", invitees.get(0));
+
             // Get auto-match criteria.
             Bundle autoMatchCriteria = null;
             int minAutoMatchPlayers = data.getIntExtra(
@@ -462,10 +469,14 @@ public class LevelMenu extends Activity implements ConnectionCallbacks, OnConnec
                 autoMatchCriteria = null;
             }
 
+            Log.d("aMC", "" + autoMatchCriteria);
+
             TurnBasedMatchConfig tbmc = TurnBasedMatchConfig.builder()
                     .addInvitedPlayers(invitees)
                     .setAutoMatchCriteria(autoMatchCriteria)
                     .build();
+
+            Log.d("TBMC", tbmc.getInvitedPlayerIds()[0]);
 
             // Create and start the match.
             Games.TurnBasedMultiplayer
@@ -535,7 +546,6 @@ public class LevelMenu extends Activity implements ConnectionCallbacks, OnConnec
 		// Check if the status code is not success.
         Status status = result.getStatus();
         Log.d("Status", status.toString());
-		Log.d("Client", client.toString());
 //        if (status.isSuccess()) {
 ////            showErrorDialog(status.getStatusCode());
 //            return;
@@ -607,9 +617,9 @@ public class LevelMenu extends Activity implements ConnectionCallbacks, OnConnec
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if(keyCode == KeyEvent.KEYCODE_BACK) {
-			ButtonPressed.wincheck = new String [82][81];
+			ButtonPressed.wincheck = new String [10][9];
 			ButtonPressed.metawincheck = new String [3][3];
-			Board.wincheck = new String [82][81];
+			Board.wincheck = new String [10][9];
 			ButtonPressed.currentTurn = "";
 			this.finish();	
 		}

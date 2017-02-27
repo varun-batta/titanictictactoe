@@ -78,7 +78,7 @@ public class BoardAdapter extends BaseAdapter {
 		int column = -1;
 //		View view = null;
 		
-		Log.d("gV", "getView Called - " + position);
+//		Log.d("gV", "getView Called - " + position);
 		
 		switch(position) {
 		case 0:
@@ -158,11 +158,11 @@ public class BoardAdapter extends BaseAdapter {
 			}
 			button.setId(key);
 			if(Board.keys.get(key) == null) {
-				Log.d("nBID", "" + key);
+//				Log.d("nBID", "" + key);
 				Board.keys.put(key, button);
 				return button;
 			} else {
-				Log.d("reBID", "" + myTurn + " " + key);
+//				Log.d("reBID", "" + myTurn + " " + key);
 				button = Board.keys.get(key);
 				if(!myTurn) {
 					button.setEnabled(false);
@@ -179,7 +179,7 @@ public class BoardAdapter extends BaseAdapter {
 			int boardWidth = width/3 - 15;
 			int boardHeight = height/3 - 15;
 			LayoutParams params = new LayoutParams(boardWidth, boardHeight);
-			Log.d("boardHeight", "" + boardHeight);
+//			Log.d("boardHeight", "" + boardHeight);
 			View board = null;
 			if(ButtonPressed.metawincheck[row][column] == null) {
 				board = new GridView(context);
@@ -218,7 +218,7 @@ public class BoardAdapter extends BaseAdapter {
 	}
 	
 	public void replace () {
-		Log.d("replace", "called");
+//		Log.d("replace", "called");
 		notifyDataSetChanged();
 	}
 

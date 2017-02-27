@@ -24,12 +24,12 @@
         "source": "C:\\Users\\varun\\StudioProjects\\TitanicTicTacToe\\app\\src\\main\\res\\drawable-xxhdpi-v11\\test_icon2.png"
     },
     {
-        "merged": "C:\\Users\\varun\\StudioProjects\\TitanicTicTacToe\\app\\build\\intermediates\\res\\merged\\debug\\drawable-xxhdpi-v11\\notification_icon.png",
-        "source": "C:\\Users\\varun\\StudioProjects\\TitanicTicTacToe\\app\\src\\main\\res\\drawable-xxhdpi-v11\\notification_icon.png"
-    },
-    {
         "merged": "C:\\Users\\varun\\StudioProjects\\TitanicTicTacToe\\app\\build\\intermediates\\res\\merged\\debug\\drawable-xxhdpi-v11\\level2unfilled.png",
         "source": "C:\\Users\\varun\\StudioProjects\\TitanicTicTacToe\\app\\src\\main\\res\\drawable-xxhdpi-v11\\level2unfilled.png"
+    },
+    {
+        "merged": "C:\\Users\\varun\\StudioProjects\\TitanicTicTacToe\\app\\build\\intermediates\\res\\merged\\debug\\drawable-xxhdpi-v11\\notification_icon.png",
+        "source": "C:\\Users\\varun\\StudioProjects\\TitanicTicTacToe\\app\\src\\main\\res\\drawable-xxhdpi-v11\\notification_icon.png"
     },
     {
         "merged": "C:\\Users\\varun\\StudioProjects\\TitanicTicTacToe\\app\\build\\intermediates\\res\\merged\\debug\\drawable-xxhdpi-v11\\ic_stat_titanictictactoenotificationicon.png",

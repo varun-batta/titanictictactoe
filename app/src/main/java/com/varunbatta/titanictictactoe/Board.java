@@ -63,7 +63,7 @@ public class Board extends Activity implements ConnectionCallbacks, OnConnection
 	public static Hashtable<Integer, Button> keys = new Hashtable<Integer, Button>(6561);
 	public static byte [] onGoingMatch = null;
 	public static boolean useIndex = false;
-	public static String [][] wincheck = new String [82][81];
+	public static String [][] wincheck = new String [10][9];
 	public static String matchId;
 	public static BoardAdapter boardAdapter;
 	public static ButtonPressed bp;
@@ -81,6 +81,7 @@ public class Board extends Activity implements ConnectionCallbacks, OnConnection
 	public static boolean done = false;
 	public static boolean boardVisible;
 	public static boolean saveCalled = false;
+	public boolean onCreateCalled = false;
 	
 	public static GoogleApiClient client;
 	
@@ -110,6 +111,7 @@ public class Board extends Activity implements ConnectionCallbacks, OnConnection
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+        onCreateCalled = true;
 		boardVisible = true;
 		setContentView(R.layout.board);
 		BoardAdapter.numberOfTimesPositionIsZero = 0;
@@ -143,7 +145,8 @@ public class Board extends Activity implements ConnectionCallbacks, OnConnection
 			Log.d("oGM", "not null");
 			savedGameRecreate(onGoingMatch, context);
 		}
-		
+
+		Log.d("oC", "Board.onCreate()");
 		client = new GoogleApiClient.Builder(this)
         .addApi(Plus.API)
         .addScope(Plus.SCOPE_PLUS_LOGIN)
@@ -269,8 +272,8 @@ public class Board extends Activity implements ConnectionCallbacks, OnConnection
 						(currentPlayer.equals(player2) && !currentTurn.contains("O")) ){
 						myTurn = false;
 				}
-				Toast.makeText(context, "myTurn = " + myTurn, Toast.LENGTH_SHORT).show();
-				Toast.makeText(context, "currentTurn = " + currentTurn, Toast.LENGTH_SHORT).show();
+//				Toast.makeText(context, "myTurn = " + myTurn, Toast.LENGTH_SHORT).show();
+//				Toast.makeText(context, "currentTurn = " + currentTurn, Toast.LENGTH_SHORT).show();
 				//				Toast.makeText(context, "player1: " + player1, Toast.LENGTH_SHORT).show();
 				//				Toast.makeText(context, "player2: " + player2, Toast.LENGTH_SHORT).show();
 				if(currentTurn.contains("X")) {
@@ -284,7 +287,7 @@ public class Board extends Activity implements ConnectionCallbacks, OnConnection
 					currentTurn = "X";
 				}
 			} else {
-				Toast.makeText(context, "onGoingMatch == null", Toast.LENGTH_SHORT).show();
+//				Toast.makeText(context, "onGoingMatch == null", Toast.LENGTH_SHORT).show();
 				playerTurn.setText(player1 + "'s Turn");
 				currentTurn = "X";
 			}
@@ -328,12 +331,66 @@ public class Board extends Activity implements ConnectionCallbacks, OnConnection
 	@Override
 	protected void onResume() {
 		super.onResume();
+        Log.d("oR", "Board.onResume()");
+		NotificationService.notificationManager.cancel(NotificationService.NOTIFICATION);
+        String turn = "";
+        Log.d("tM", "" + NotificationService.turnMade);
+        Log.d("oCC", "" + onCreateCalled);
+        if(!onCreateCalled && NotificationService.turnMade) {
+            player1 = wincheck[wincheck.length - 1][2];
+            player2 = wincheck[wincheck.length - 1][3];
+            currentTurn = wincheck[wincheck.length - 1][4];
+            String currentPlayer = null;
+            if (Plus.PeopleApi.getCurrentPerson(Index.client) != null) {
+                Person currentPerson = Plus.PeopleApi.getCurrentPerson(Index.client);
+                currentPlayer = currentPerson.getDisplayName();
+            }
+            if ( (currentPlayer.equals(player1) && !currentTurn.contains("X")) ||
+                    (currentPlayer.equals(player2) && !currentTurn.contains("O")) ){
+                myTurn = false;
+            }
+//            Toast.makeText(context, "myTurn = " + myTurn, Toast.LENGTH_SHORT).show();
+//            Toast.makeText(context, "currentTurn = " + currentTurn, Toast.LENGTH_SHORT).show();
+            //				Toast.makeText(context, "player1: " + player1, Toast.LENGTH_SHORT).show();
+            //				Toast.makeText(context, "player2: " + player2, Toast.LENGTH_SHORT).show();
+            if(currentTurn.contains("X")) {
+                //					Toast.makeText(context, player1 + "'s Turn", Toast.LENGTH_SHORT).show();
+                playerTurn.setText(player1 + "'s Turn");
+                turn = "O";
+            } else if (currentTurn.contains("O")) {
+                //					Toast.makeText(context, player2 + "'s Turn", Toast.LENGTH_SHORT).show();
+                playerTurn.setText(player2 + "'s Turn");
+                turn = "X";
+            } else {
+                playerTurn.setText(player1 + "'s Turn");
+                currentTurn = "X";
+                turn = "O";
+            }
+            f = Integer.parseInt(wincheck[wincheck.length - 1][0]);
+            g = Integer.parseInt(wincheck[wincheck.length - 1][1]);
+            Log.d("f", "" + f);
+            Log.d("g", "" + g);
+            int key = -1;
+            switch(n){
+                case 1:
+                    key = f*3 + g;
+                    break;
+                case 2:
+                    key = f*9 + g;
+                    break;
+            }
+            keys.get(key).setText(turn);
+            bp.boardChanger(f, g, 2, true);
+            NotificationService.turnMade = false;
+        }
+        onCreateCalled = false;
 		boardVisible = true;
 	}
 	
 	@Override
 	protected void onPause() {
 		super.onPause();
+        Log.d("oP", "Board.onPause()");
 		boardVisible = false;
 	}
 	
@@ -381,7 +438,7 @@ public class Board extends Activity implements ConnectionCallbacks, OnConnection
 		for(int k = 0; k < gameArray.length(); k++) {
 			if(gameArray.charAt(k) == 'X' || gameArray.charAt(k) == 'O') {
 				wincheck[i][j] = "" + gameArray.charAt(k);
-				if(i < 81 && winChecker(i, j, n, n, wincheck, "" + gameArray.charAt(k))) {
+				if(i < 9 && winChecker(i, j, n, n, wincheck, "" + gameArray.charAt(k))) {
 					winChecker(i/3, j/3, 1, n, ButtonPressed.metawincheck, "" + gameArray.charAt(k));
 				}
 			} else if(gameArray.charAt(k) == 'n' || gameArray.charAt(k) == 'u' || gameArray.charAt(k) == 'l') {
@@ -396,7 +453,7 @@ public class Board extends Activity implements ConnectionCallbacks, OnConnection
 			}
 			
 		}
-		i = 81;
+		i = 9;
 //		Log.d("gameArray", gameArray);
 		String [] rows = gameArray.split(";");
 		String [][] game = new String [rows.length][];
@@ -409,6 +466,9 @@ public class Board extends Activity implements ConnectionCallbacks, OnConnection
 		wincheck[i][3] = "" + game[i][3];
 		wincheck[i][4] = "" + game[i][4];
 		wincheck[i][5] = "" + Integer.parseInt(game[i][5]);
+        wincheck[i][6] = "" + game[i][6];
+        wincheck[i][7] = "" + game[i][7];
+        wincheck[i][8] = "" + game[i][8];
 		
 //		bp.boardChanger(Integer.parseInt(game[i][0]), Integer.parseInt(game[i][1]), n, !multiplayer);
 	}
@@ -773,9 +833,9 @@ public class Board extends Activity implements ConnectionCallbacks, OnConnection
 			keys = new Hashtable<Integer, Button>(6561);
 			bottomPanel.removeAllViews();
 			boardLayout.removeAllViews();
-			ButtonPressed.wincheck = new String [82][81];
+			ButtonPressed.wincheck = new String [10][9];
 			ButtonPressed.metawincheck = new String [3][3];
-			Board.wincheck = new String [82][81];
+			Board.wincheck = new String [10][9];
 			ButtonPressed.currentTurn = "";
 			player1 = null;
 			player2 = null;
@@ -796,9 +856,9 @@ public class Board extends Activity implements ConnectionCallbacks, OnConnection
 			keys = new Hashtable<Integer, Button>(6561);
 			bottomPanel.removeAllViews();
 			boardLayout.removeAllViews();
-			ButtonPressed.wincheck = new String [82][81];
+			ButtonPressed.wincheck = new String [10][9];
 			ButtonPressed.metawincheck = new String [3][3];
-			Board.wincheck = new String [82][81];
+			Board.wincheck = new String [10][9];
 			this.currentTurn = null;
 			ButtonPressed.currentTurn = "";
 			player1 = null;
@@ -824,9 +884,9 @@ public class Board extends Activity implements ConnectionCallbacks, OnConnection
 			keys = new Hashtable<Integer, Button>(6561);
 			bottomPanel.removeAllViews();
 			boardLayout.removeAllViews();
-			ButtonPressed.wincheck = new String [82][81];
+			ButtonPressed.wincheck = new String [10][9];
 			ButtonPressed.metawincheck = new String [3][3];
-			Board.wincheck = new String [82][81];
+			Board.wincheck = new String [10][9];
 			ButtonPressed.currentTurn = "";
 			player1 = null;
 			player2 = null;
@@ -838,9 +898,9 @@ public class Board extends Activity implements ConnectionCallbacks, OnConnection
 			keys = new Hashtable<Integer, Button>(6561);
 			bottomPanel.removeAllViews();
 			boardLayout.removeAllViews();
-			ButtonPressed.wincheck = new String [82][81];
+			ButtonPressed.wincheck = new String [10][9];
 			ButtonPressed.metawincheck = new String [3][3];
-			Board.wincheck = new String [82][81];
+			Board.wincheck = new String [10][9];
 			ButtonPressed.currentTurn = "";
 			player1 = null;
 			player2 = null;
@@ -852,9 +912,9 @@ public class Board extends Activity implements ConnectionCallbacks, OnConnection
 			keys = new Hashtable<Integer, Button>(6561);
 			bottomPanel.removeAllViews();
 			boardLayout.removeAllViews();
-			ButtonPressed.wincheck = new String [82][81];
+			ButtonPressed.wincheck = new String [10][9];
 			ButtonPressed.metawincheck = new String [3][3];
-			Board.wincheck = new String [82][81];
+			Board.wincheck = new String [10][9];
 			ButtonPressed.currentTurn = "";
 			player1 = null;
 			player2 = null;
@@ -1014,11 +1074,11 @@ public class Board extends Activity implements ConnectionCallbacks, OnConnection
 	                    outAnimation.setDuration(200);
 	                    progressBarHolder.setAnimation(outAnimation);
 	                    progressBarHolder.setVisibility(View.GONE);
-	                    if(result) {
-	                    	Toast.makeText(context, "Saved!", Toast.LENGTH_SHORT).show();
-	                    } else {
-	                    	Toast.makeText(context, "Cannot save", Toast.LENGTH_SHORT).show();
-	                    }
+//	                    if(result) {
+//	                    	Toast.makeText(context, "Saved!", Toast.LENGTH_SHORT).show();
+//	                    } else {
+//	                    	Toast.makeText(context, "Cannot save", Toast.LENGTH_SHORT).show();
+//	                    }
 	                }
 	            };
 	            updateTask.execute();
@@ -1088,11 +1148,11 @@ public class Board extends Activity implements ConnectionCallbacks, OnConnection
                 outAnimation.setDuration(200);
                 progressBarHolder.setAnimation(outAnimation);
                 progressBarHolder.setVisibility(View.GONE);
-                if(result) {
-                	Toast.makeText(context, "Saved!", Toast.LENGTH_SHORT).show();
-                } else {
-                	Toast.makeText(context, "Cannot save", Toast.LENGTH_SHORT).show();
-                }
+//                if(result) {
+//                	Toast.makeText(context, "Saved!", Toast.LENGTH_SHORT).show();
+//                } else {
+//                	Toast.makeText(context, "Cannot save", Toast.LENGTH_SHORT).show();
+//                }
             }
         };
 

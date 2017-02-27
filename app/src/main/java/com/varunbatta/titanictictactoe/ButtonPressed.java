@@ -95,7 +95,7 @@ public class ButtonPressed implements OnClickListener {
 		
 		if(currentTurn.equals("") && Board.currentTurn != null) {
 			this.currentTurn = Board.currentTurn;
-			Toast.makeText(context, "currentTurn: " + currentTurn, Toast.LENGTH_SHORT).show();
+//			Toast.makeText(context, "currentTurn: " + currentTurn, Toast.LENGTH_SHORT).show();
 		}
 		
 //		if(com.example.titanictictactoe.GameSaver.save.equals("Saved"))
@@ -270,7 +270,9 @@ public class ButtonPressed implements OnClickListener {
 				
 				Log.d("Player 1", Board.player1);
 				Log.d("Player 2", Board.player2);
-				
+				Log.d("pPId", Board.pendingPlayerId);
+                Log.d("cPId", Board.currentPlayerId);
+
 				wincheck[wincheck.length-1][0] = Integer.toString(m);
 				wincheck[wincheck.length-1][1] = Integer.toString(f);
 				wincheck[wincheck.length-1][2] = Board.player1;
@@ -1861,7 +1863,7 @@ public class ButtonPressed implements OnClickListener {
 		finishGameTask.execute(tie);
 	}
 
-	private void saveGame(String[][] winchecker, String matchId, String alternatePlayer) {
+	private void saveGame(String[][] winchecker, final String matchId, final String alternatePlayer) {
 		AsyncTask<String, Void, Boolean> updateTask = new AsyncTask<String, Void, Boolean>() {
 
 			@Override
@@ -1895,6 +1897,10 @@ public class ButtonPressed implements OnClickListener {
 //					client = CurrentGames.client;
 //				}
 				if(client.isConnected()){
+					Log.d("Params[0]", params[0]);
+                    Log.d("MatchID", matchId);
+                    Log.d("Params[1]", params[1]);
+                    Log.d("AlternatePlayer", alternatePlayer);
 					index.registerTurnBasedClient(client);
 					Games.TurnBasedMultiplayer.takeTurn(client, params[0], wincheckerToByteArray(wincheck), params[1]);
 					savedMultiplayer = true;

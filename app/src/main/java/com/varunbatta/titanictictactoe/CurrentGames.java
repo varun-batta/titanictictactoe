@@ -459,6 +459,7 @@ public class CurrentGames extends Activity implements ConnectionCallbacks, OnCon
 		int level = getLevel(gameData);
 		Log.d("Level", "" + level);
 		int status = match.getTurnStatus();
+		Log.d("Status", "" + status);
 		boolean myTurn = false;
 		
 		if(status == TurnBasedMatch.MATCH_TURN_STATUS_MY_TURN) {
@@ -507,7 +508,7 @@ public class CurrentGames extends Activity implements ConnectionCallbacks, OnCon
 		for(int i = 0; i < rows.length; i++) {
 			board[i] = rows[i].split(",");
 		}
-		level = Integer.parseInt(board[81][5]);
+		level = Integer.parseInt(board[9][5]);
 		return level;
 	}
 
