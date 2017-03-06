@@ -139,6 +139,7 @@ public class Board extends Activity implements ConnectionCallbacks, OnConnection
 		test = getIntent().getBooleanExtra("Test", false);
 		savedGame = getIntent().getBooleanExtra("Saved Game", false);
 		Log.d("savedGame", "" + savedGame);
+        Log.d("test", "" + test);
 		bp = new ButtonPressed(context, n);
 		if(onGoingMatch != null) {
 			useIndex = true;
@@ -236,8 +237,11 @@ public class Board extends Activity implements ConnectionCallbacks, OnConnection
 		//			bottomPanel = (LinearLayout) findViewById(R.id.bottomPanel);
 		if ( bottomPanel == null ) {
 			bottomPanel = new LinearLayout(context);
+            bottomPanel.setId(R.id.bottomPanel);
 		}
-		
+
+        Log.d("bPCC", "" + bottomPanel.getChildCount());
+
 		if ( bottomPanel.getChildCount() == 0 ) {
 			menu = new Button(context);
 			menu.setText("Menu");
@@ -322,20 +326,43 @@ public class Board extends Activity implements ConnectionCallbacks, OnConnection
 				//				bottomPanel2.addView(rematch);
 				//			}
 			}
+            Log.d("abP", "adding bottomPanel");
 			if(!test) {
+                Log.d("bPA", "bottomPanel Added!");
 				boardLayout.addView(bottomPanel);
 			}
-		}
+		} /*else {
+            Log.d("bPP", "" + bottomPanel.getParent().toString());
+            boardLayout.removeView(bottomPanel);
+            boardLayout.addView(bottomPanel);
+        }*/
+
+        Log.d("bLFVBID", "" + boardLayout.findViewById(R.id.bottomPanel));
 	}
 	
 	@Override
 	protected void onResume() {
 		super.onResume();
         Log.d("oR", "Board.onResume()");
+        Log.d("bP", "" + bottomPanel.getChildCount());
 		NotificationService.notificationManager.cancel(NotificationService.NOTIFICATION);
         String turn = "";
         Log.d("tM", "" + NotificationService.turnMade);
         Log.d("oCC", "" + onCreateCalled);
+        if(boardLayout.findViewById(R.id.bottomPanel) == null) {
+            boardLayout.addView(bottomPanel);
+            if(currentTurn.contains("X")) {
+                //					Toast.makeText(context, player1 + "'s Turn", Toast.LENGTH_SHORT).show();
+                playerTurn.setText(player1 + "'s Turn");
+            } else if (currentTurn.contains("O")) {
+                //					Toast.makeText(context, player2 + "'s Turn", Toast.LENGTH_SHORT).show();
+                playerTurn.setText(player2 + "'s Turn");
+            } else {
+                playerTurn.setText(player1 + "'s Turn");
+                currentTurn = "X";
+            }
+        }
+        ButtonPressed.currentTurn = Board.currentTurn;
         if(!onCreateCalled && NotificationService.turnMade) {
             player1 = wincheck[wincheck.length - 1][2];
             player2 = wincheck[wincheck.length - 1][3];
@@ -391,8 +418,26 @@ public class Board extends Activity implements ConnectionCallbacks, OnConnection
 	protected void onPause() {
 		super.onPause();
         Log.d("oP", "Board.onPause()");
-		boardVisible = false;
+        boardVisible = false;
 	}
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Log.d("oS", "Board.onStop()");
+        boardLayout.removeView(bottomPanel);
+//        keys = new Hashtable<Integer, Button>(6561);
+//        bottomPanel.removeAllViews();
+//        boardLayout.removeAllViews();
+//        ButtonPressed.wincheck = new String [10][9];
+//        ButtonPressed.metawincheck = new String [3][3];
+//        Board.wincheck = new String [10][9];
+//        ButtonPressed.currentTurn = "";
+//        player1 = null;
+//        player2 = null;
+//        boardVisible = false;
+//        this.finish();
+    }
 	
 	@Override
 	public void onWindowFocusChanged(boolean hasFocus) {
@@ -409,14 +454,16 @@ public class Board extends Activity implements ConnectionCallbacks, OnConnection
 	
 	@Override
 	public void onSaveInstanceState(Bundle instanceState) {
-		super.onSaveInstanceState(instanceState);
-		Log.d("OSIS", "Saved!");
-		instanceState.putByteArray("On Going Match", ButtonPressed.wincheckerToByteArray(ButtonPressed.wincheck));
-		
-		SharedPreferences.Editor editor = sharedPreferences.edit();
-		editor.putString("On Going Match", Base64.encodeToString(ButtonPressed.wincheckerToByteArray(ButtonPressed.wincheck), Base64.DEFAULT));
-		editor.commit();
-		Log.d("sPE", "Shared Preferences Edited");
+		if(!done) {
+            super.onSaveInstanceState(instanceState);
+            Log.d("OSIS", "Saved!");
+            instanceState.putByteArray("On Going Match", ButtonPressed.wincheckerToByteArray(ButtonPressed.wincheck));
+
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putString("On Going Match", Base64.encodeToString(ButtonPressed.wincheckerToByteArray(ButtonPressed.wincheck), Base64.DEFAULT));
+            editor.commit();
+            Log.d("sPE", "Shared Preferences Edited");
+        }
 	}
 	
 	@Override
@@ -469,7 +516,8 @@ public class Board extends Activity implements ConnectionCallbacks, OnConnection
         wincheck[i][6] = "" + game[i][6];
         wincheck[i][7] = "" + game[i][7];
         wincheck[i][8] = "" + game[i][8];
-		
+
+        Log.d("Last Move", "" + wincheck[Integer.parseInt(wincheck[i][0])][Integer.parseInt(wincheck[i][1])]);
 //		bp.boardChanger(Integer.parseInt(game[i][0]), Integer.parseInt(game[i][1]), n, !multiplayer);
 	}
 	
@@ -791,7 +839,10 @@ public class Board extends Activity implements ConnectionCallbacks, OnConnection
 //			
 //		}
 //		StackTraceElement [] stackTraceElements = Thread.currentThread().getStackTrace();
-		done = true;
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.clear();
+        editor.commit();
+        done = true;
 		this.finish();
 		boardVisible = false;
 //		Log.d("fACaller", stackTraceElements[3].toString());

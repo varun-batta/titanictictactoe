@@ -213,6 +213,17 @@ GoogleApiClient.OnConnectionFailedListener, OnInvitationReceivedListener, OnTurn
 		return board[board.length - 1][6];
 	}
 
+    public boolean checkMultiplayer(byte [] game) {
+        String gameArray = new String(game);
+        String [] rows = gameArray.split(";");
+        String [][] board = new String [rows.length][];
+        for(int i = 0; i < rows.length; i++) {
+            board[i] = rows[i].split(",");
+        }
+
+        return !board[board.length - 1][6].equals("null");
+    }
+
 	//	@Override
 //	public void onResult(InitiateMatchResult arg0) {
 //		// TODO Auto-generated method stub
@@ -508,7 +519,7 @@ GoogleApiClient.OnConnectionFailedListener, OnInvitationReceivedListener, OnTurn
 			boolean myTurn = true;
 			Log.d("CPId", getCurrentParticipantId(game));
 			Log.d("CT", getCurrentTurn(game));
-			if ( (getCurrentTurn(game).equals("X") && !Games.Players.getCurrentPlayer(client).getDisplayName().equals(getPlayer(game, 1))) ||
+			if ( checkMultiplayer(game) && (getCurrentTurn(game).equals("X") && !Games.Players.getCurrentPlayer(client).getDisplayName().equals(getPlayer(game, 1))) ||
                     (getCurrentTurn(game).equals("O") && !Games.Players.getCurrentPlayer(client).getDisplayName().equals(getPlayer(game, 2))) ) {
 				myTurn = false;
 			}
@@ -525,7 +536,7 @@ GoogleApiClient.OnConnectionFailedListener, OnInvitationReceivedListener, OnTurn
 				board.putExtra("My Turn", myTurn);
 				board.putExtra("Finished", false);
 				board.putExtra("Can Rematch", true);
-				board.putExtra("Multiplayer", true);
+				board.putExtra("Multiplayer", checkMultiplayer(game));
 				board.putExtra("Saved Game", true);
 				startActivity(board);
 			}
@@ -579,7 +590,7 @@ GoogleApiClient.OnConnectionFailedListener, OnInvitationReceivedListener, OnTurn
 		for(int i = 0; i < rows.length; i++) {
 			board[i] = rows[i].split(",");
 		}
-		level = Integer.parseInt(board[9][5]);
+		level = Integer.parseInt(board[rows.length - 1][5]);
 		return level;
 	}
 }

@@ -140,6 +140,7 @@ public class BoardAdapter extends BaseAdapter {
 			int buttonBackgroundDrawableId = context.getResources().getIdentifier("board_btn", "drawable", context.getPackageName());
 			button.setBackground(context.getResources().getDrawable(buttonBackgroundDrawableId));
 			if( !myTurn || ( Board.wincheck[metaRow*3 + row][metaColumn*3 + column] != null && !Board.wincheck[metaRow*3 + row][metaColumn*3 + column].equals("") ) ) {
+				Log.d("Pressed Keys", "(" + (metaRow*3 + row) + ", " + (metaColumn*3 + column) +") - " + Board.wincheck[metaRow*3 + row][metaColumn*3 + column]);
 				button.setText(Board.wincheck[metaRow*3 + row][metaColumn*3 + column]);
 				button.setEnabled(false);
 			}
@@ -158,12 +159,15 @@ public class BoardAdapter extends BaseAdapter {
 			}
 			button.setId(key);
 			if(Board.keys.get(key) == null) {
-//				Log.d("nBID", "" + key);
+				Log.d("nBID", "" + key);
 				Board.keys.put(key, button);
 				return button;
 			} else {
-//				Log.d("reBID", "" + myTurn + " " + key);
+				Log.d("reBID", "" + myTurn + " " + key);
 				button = Board.keys.get(key);
+                if(Board.wincheck[metaRow * 3 + row][metaColumn * 3 + column] != null && !Board.wincheck[metaRow*3 + row][metaColumn*3 + column].equals("")) {
+                    button.setText(Board.wincheck[metaRow*3 + row][metaColumn*3 + column]);
+                }
 				if(!myTurn) {
 					button.setEnabled(false);
 				}

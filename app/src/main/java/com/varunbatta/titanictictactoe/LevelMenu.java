@@ -321,6 +321,8 @@ public class LevelMenu extends Activity implements ConnectionCallbacks, OnConnec
 		level = new Intent(context, Board.class);
 		level.putExtra("Multiplayer", multiplayer);
 		level.putExtra("Caller", "LevelMenu");
+		level.putExtra("Player 1 Name", player1Name);
+        level.putExtra("Player 2 Name", player2Name);
 		if(instructions) {
 			level.putExtra("Test", true);
 			level.putExtra("Player 1 Name", "Player 1");
@@ -616,13 +618,21 @@ public class LevelMenu extends Activity implements ConnectionCallbacks, OnConnec
 	
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
-		if(keyCode == KeyEvent.KEYCODE_BACK) {
+		boolean backPressed = false;
+        if(keyCode == KeyEvent.KEYCODE_BACK) {
+            backPressed = true;
 			ButtonPressed.wincheck = new String [10][9];
 			ButtonPressed.metawincheck = new String [3][3];
 			Board.wincheck = new String [10][9];
 			ButtonPressed.currentTurn = "";
-			this.finish();	
+			Intent mainMenuIntent = new Intent(context, MainMenu.class);
+            startActivity(mainMenuIntent);
+            this.finish();
 		}
-		return super.onKeyDown(keyCode, event);
+        if(backPressed) {
+            return true;
+        } else {
+            return super.onKeyDown(keyCode, event);
+        }
 	}
 }

@@ -36,7 +36,7 @@ public class ButtonPressed implements OnClickListener {
 //	JLabel tie1 = new JLabel("Sorry, but you have tied");
 //	JFrame sorry = new JFrame("Sorry");
 //	JLabel sorry1 = new JLabel("Sorry, but this function is currently unavailable");
-	static String wincheck[][] = new String [82][81];
+	static String wincheck[][] = new String [10][9];
 	static String metawincheck[][] = new String [3][3];
 	static String metametawincheck[][] = new String [3][3];
 	static String metametaminiwincheck[][] =  new String[9][9];
@@ -97,7 +97,9 @@ public class ButtonPressed implements OnClickListener {
 			this.currentTurn = Board.currentTurn;
 //			Toast.makeText(context, "currentTurn: " + currentTurn, Toast.LENGTH_SHORT).show();
 		}
-		
+
+        Log.d("tCT", this.currentTurn);
+        Log.d("BCT", Board.currentTurn);
 //		if(com.example.titanictictactoe.GameSaver.save.equals("Saved"))
 //			wincheck = newDossier.GameSaver.completegame;
 		
@@ -1874,7 +1876,7 @@ public class ButtonPressed implements OnClickListener {
 					for ( int j = 0; j < dimensions; j++ ) {
 						int key = i * dimensions + j;
 						Button button = Board.keys.get(key);
-						Log.d("sCF", "Button: "+ key);
+//						Log.d("sCF", "Button: "+ key);
 						if (button != null) {
 							button.setClickable(false);
 						}
@@ -1950,7 +1952,7 @@ public class ButtonPressed implements OnClickListener {
 					for ( int j = 0; j < dimensions; j++ ) {
 						int key = i * dimensions + j;
 						Button button = Board.keys.get(key);
-						Log.d("sCF", "Button: "+ key);
+//						Log.d("sCF", "Button: "+ key);
 						if (button != null) {
 							button.setClickable(false);
 						}

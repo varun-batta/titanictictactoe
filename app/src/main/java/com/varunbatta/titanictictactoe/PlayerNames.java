@@ -90,7 +90,7 @@ public class PlayerNames extends Activity {
 		
 		Button okconfirmed = (Button) v;
 		if(!okconfirmed.isSelected()){
-				if(player1name.matches("")||player2name.matches("")){
+			if(player1name.matches("")||player2name.matches("")){
 				Toast warning = Toast.makeText(context, "Sorry, but you must fill in the names of both players!", Toast.LENGTH_SHORT);
 				warning.show();
 			} else{

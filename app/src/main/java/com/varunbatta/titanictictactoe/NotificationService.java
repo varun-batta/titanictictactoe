@@ -297,6 +297,8 @@ OnConnectionFailedListener {
                 //			}
             } else if (match.getTurnStatus() == TurnBasedMatch.MATCH_TURN_STATUS_MY_TURN){
                 Log.d("IndexN", "Index Notification");
+                byte [] game = match.getData();
+                Board.savedGameRecreate(game, context);
                 int tbms = match.getTurnStatus();
                 Log.d("TurnStatus", "" + match.getTurnStatus());
                 int ms = match.getStatus();
