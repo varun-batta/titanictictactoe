@@ -36,6 +36,8 @@ import com.google.android.gms.games.multiplayer.turnbased.OnTurnBasedMatchUpdate
 import com.google.android.gms.games.multiplayer.turnbased.TurnBasedMatch;
 import com.google.android.gms.plus.Plus;
 
+import com.facebook.FacebookSdk;
+
 public class Index<match> extends Activity implements GoogleApiClient.ConnectionCallbacks, 
 GoogleApiClient.OnConnectionFailedListener, OnInvitationReceivedListener, OnTurnBasedMatchUpdateReceivedListener {
 	public static Context context;

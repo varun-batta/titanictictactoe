@@ -10,5 +10,6 @@
     <string name="guide">This is the enhanced version of Tic-Tac-Toe. Enjoy!</string>
     <string name="player1">Player 1</string>
     <string name="player2">Player 2</string>
+    <string name="facebook_app_id">267430880368292</string>
 
 </resources>
