@@ -7,7 +7,7 @@ android {
     defaultConfig {
         applicationId "com.varunbatta.titanictictactoe"
         minSdkVersion 23
-        targetSdkVersion 25
+        targetSdkVersion 28
         multiDexEnabled true
     }
 
