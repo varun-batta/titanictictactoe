@@ -11,7 +11,7 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
 import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
 import com.google.android.gms.games.Games;
-import com.google.android.gms.games.internal.constants.TurnBasedMatchStatus;
+//import com.google.android.gms.games.internal.constants.TurnBasedMatchStatus;
 import com.google.android.gms.games.multiplayer.ParticipantResult;
 import com.google.android.gms.games.multiplayer.turnbased.OnTurnBasedMatchUpdateReceivedListener;
 import com.google.android.gms.games.multiplayer.turnbased.TurnBasedMatch;
@@ -33,6 +33,7 @@ import android.os.PowerManager;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.widget.Button;
+import android.widget.TextView;
 
 /**
  * @author Varun
@@ -143,9 +144,9 @@ OnConnectionFailedListener {
 		board = new Board();
 		String opponentName = match.getParticipant(getPendingParticipantId(match)).getDisplayName();
 		ParticipantResult currentPlayerParticipantResult = match.getParticipant(match.getParticipantId(Games.Players.getCurrentPlayerId(client))).getResult();
-        if ( match.getTurnStatus() == TurnBasedMatch.MATCH_TURN_STATUS_MY_TURN && Board.boardVisible) {
+        if ( match.getTurnStatus() == TurnBasedMatch.MATCH_TURN_STATUS_MY_TURN && board.boardVisible) {
             byte[] game = match.getData();
-            Board.savedGameRecreate(game, context);
+            board.savedGameRecreate(game);//, context);
 
             int level = Integer.parseInt(Board.wincheck[Board.wincheck.length - 1][5]);
             int row = Integer.parseInt(Board.wincheck[Board.wincheck.length - 1][0]);
@@ -156,20 +157,20 @@ OnConnectionFailedListener {
             String turn = "";
 
             ButtonPressed.currentTurn = Board.wincheck[Board.wincheck.length - 1][4];
-
+            TextView playerTurn = board.findViewById(R.id.player_turn);
             if (Board.wincheck[Board.wincheck.length - 1][4].equals("X")) {
                 turn = "O";
-                ButtonPressed.playerturn.setText(Board.wincheck[Board.wincheck.length - 1][2] + "'s Turn");
+                playerTurn.setText(Board.wincheck[Board.wincheck.length - 1][2] + "'s Turn");
             } else {
                 turn = "X";
-                ButtonPressed.playerturn.setText(Board.wincheck[Board.wincheck.length - 1][3] + "'s Turn");
+                playerTurn.setText(Board.wincheck[Board.wincheck.length - 1][3] + "'s Turn");
             }
 
             Button opponentMove = Board.keys.get(key);
             opponentMove.setText(turn);
             opponentMove.setEnabled(false);
 
-            ButtonPressed bp = new ButtonPressed(ButtonPressed.context, level);
+            ButtonPressed bp = new ButtonPressed(context, level, Index.availableGames.get(Index.availableGames.keySet().toArray()[0]), board);
 
             if (level >= 2) {
                 bp.boardChanger(row, column, level, true);
@@ -199,13 +200,13 @@ OnConnectionFailedListener {
                 lossIntent.putExtra("Winner", opponentName);
                 showNotification(lossIntent, context, "Game Over", opponentName + " Wins!");
                 Games.TurnBasedMultiplayer.finishMatch(client, match.getMatchId());
-                Board.savedGameRecreate(match.getData(), context);
+                board.savedGameRecreate(match.getData());//, context);
 
                 Board.keys = new Hashtable<Integer, Button>(6561);
-                Board.bottomPanel.removeAllViews();
-                Board.boardLayout.removeAllViews();
+                board.bottomPanel.removeAllViews();
+                board.boardLayout.removeAllViews();
                 ButtonPressed.currentTurn = "";
-                board.finishActivity(ButtonPressed.context, true, opponentName);
+                board.finishActivity(context, true, opponentName);
             } else if (currentPlayerParticipantResult != null && currentPlayerParticipantResult.getResult() == ParticipantResult.MATCH_RESULT_TIE) {
                 Intent tieIntent = new Intent(context, Winner.class);
                 tieIntent.putExtra("Match ID", match.getMatchId());
@@ -214,14 +215,14 @@ OnConnectionFailedListener {
                 tieIntent.putExtra("Winner", "Tie");
                 showNotification(tieIntent, context, "Game Over", "Tie game with " + opponentName);
                 Games.TurnBasedMultiplayer.finishMatch(client, match.getMatchId());
-                Board.savedGameRecreate(match.getData(), context);
+                board.savedGameRecreate(match.getData());//, context);
 
                 Board.keys = new Hashtable<Integer, Button>(6561);
-                Board.bottomPanel.removeAllViews();
-                Board.boardLayout.removeAllViews();
+                board.bottomPanel.removeAllViews();
+                board.boardLayout.removeAllViews();
                 ButtonPressed.currentTurn = "";
-                board.finishActivity(ButtonPressed.context, true, "Tie");
-            } else if (!powerManager.isInteractive() && !Board.boardVisible) {
+                board.finishActivity(context, true, "Tie");
+            } else if (!powerManager.isInteractive() && !board.boardVisible) {
                 Log.d("SOff", "Screen Off Notification");
                 byte[] game = match.getData();
                 Intent turnIntent = new Intent(context, Board.class);
@@ -236,7 +237,7 @@ OnConnectionFailedListener {
                 turnIntent.putExtra("Can Rematch", true);
                 turnIntent.putExtra("Multiplayer", true);
                 showNotification(turnIntent, context, "Your Turn", opponentName + " has made a move");
-                Board.savedGameRecreate(game, context);
+                board.savedGameRecreate(game);
 
                 //		} else if ( match.getTurnStatus() == TurnBasedMatch.MATCH_TURN_STATUS_MY_TURN && Board.boardVisible) {
                 //			byte [] game = match.getData();
@@ -298,7 +299,7 @@ OnConnectionFailedListener {
             } else if (match.getTurnStatus() == TurnBasedMatch.MATCH_TURN_STATUS_MY_TURN){
                 Log.d("IndexN", "Index Notification");
                 byte [] game = match.getData();
-                Board.savedGameRecreate(game, context);
+                board.savedGameRecreate(game);//, context);
                 int tbms = match.getTurnStatus();
                 Log.d("TurnStatus", "" + match.getTurnStatus());
                 int ms = match.getStatus();

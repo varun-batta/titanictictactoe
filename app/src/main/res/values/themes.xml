@@ -1,5 +1,1 @@
-<resources xmlns:android="http://schemas.android.com/apk/res/android">
-    <style name="TitanicTicTacToeTheme" parent="style/AppTheme">
-    	<item name="android:buttonStyle">@style/buttonStyle</item>
-    </style>
-</resources>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"></resources>

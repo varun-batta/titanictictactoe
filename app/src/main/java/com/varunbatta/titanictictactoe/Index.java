@@ -1,21 +1,32 @@
 package com.varunbatta.titanictictactoe;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 import android.app.Activity;
 import android.app.NotificationManager;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender.SendIntentException;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
-import android.graphics.Color;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.Signature;
 import android.graphics.Point;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
+import android.support.v7.app.AlertDialog;
 import android.util.Base64;
 import android.util.Log;
 import android.view.Display;
@@ -23,7 +34,14 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.GridView;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
+import com.facebook.CallbackManager;
+import com.facebook.FacebookCallback;
+import com.facebook.FacebookException;
+import com.facebook.FacebookSdk;
+import com.facebook.login.LoginManager;
+import com.facebook.login.LoginResult;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.drive.Drive;
@@ -36,13 +54,16 @@ import com.google.android.gms.games.multiplayer.turnbased.OnTurnBasedMatchUpdate
 import com.google.android.gms.games.multiplayer.turnbased.TurnBasedMatch;
 import com.google.android.gms.plus.Plus;
 
-import com.facebook.FacebookSdk;
+import bolts.AppLinks;
+
+//import static com.varunbatta.titanictictactoe.Board.player2;
 
 public class Index<match> extends Activity implements GoogleApiClient.ConnectionCallbacks, 
 GoogleApiClient.OnConnectionFailedListener, OnInvitationReceivedListener, OnTurnBasedMatchUpdateReceivedListener {
-	public static Context context;
-	public static NotificationManager notificationManager;
+	Context context;
+    public static NotificationManager notificationManager;
 	public static boolean receiving = false;
+	public static boolean facebookGame = false;
 	private static NotificationService notificationService = new NotificationService();
 	private IRemoteService remoteService;
 	private boolean started = false;
@@ -64,6 +85,8 @@ GoogleApiClient.OnConnectionFailedListener, OnInvitationReceivedListener, OnTurn
 		}
 		
 	};
+
+	public static Map<Long, Game> availableGames = new HashMap<Long, Game>();
 	
     public static GoogleApiClient client = null;
 	public TurnBasedMatch match;
@@ -73,85 +96,204 @@ GoogleApiClient.OnConnectionFailedListener, OnInvitationReceivedListener, OnTurn
     
     ButtonPressed bp;
     Board board;
+    Index index;
+
+	CallbackManager loginCallbackManager;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
-        if (getIntent().getFlags() == 335544320) {
-            googlePlayGamesServicesActivity = true;
-        }
-
-		if (getIntent().getByteArrayExtra("Game") != null) {
-			notificationMatch = getIntent().getByteArrayExtra("Game");
-			notificationActivity = true;
+		index = this;
+		if (!FacebookSdk.isInitialized()) {
+			FacebookSdk.sdkInitialize(getApplicationContext(), 2809);
 		}
-//		if (savedInstanceState != null) {
-//			Log.d("Saved", "Value Found");
-//			Log.d("SIS", savedInstanceState.getByteArray("On Going Match").toString());
-//			Intent board = new Intent(getApplicationContext(), Board.class);
-//			board.putExtra("On Going Match", savedInstanceState.getByteArray("On Going Match"));
-//			startActivity(board);
-//		} else {
-//			Log.d("SIS", "null");
-//		}
+
+		loginCallbackManager = CallbackManager.Factory.create();
+		LoginManager.getInstance().registerCallback(loginCallbackManager,
+				new FacebookCallback<LoginResult>() {
+					@Override
+					public void onSuccess(LoginResult loginResult) {
+						Log.d("LoginSuccess", loginResult.toString());
+					}
+
+					@Override
+					public void onCancel() {
+						Log.d("LoginCancel", "FB Login Cancelled");
+					}
+
+					@Override
+					public void onError(FacebookException exception) {
+						Log.d("LoginError", exception.toString());
+					}
+				});
+
+		LoginManager.getInstance().logInWithReadPermissions(this, Arrays.asList("public_profile", "email", "user_friends"));
+
+
+		Uri targetUrl = AppLinks.getTargetUrlFromInboundIntent(this, getIntent());
+        if (targetUrl != null) {
+            Log.i("Activity", "App Link Target URL: " + targetUrl.toString());
+            facebookGame = true;
+            String requestIdsWithKey = targetUrl.toString().split("&")[1];
+            String requestIds = requestIdsWithKey.split("=")[1];
+            String [] requestIdsList = requestIds.replace("%2C", ",").split(",");
+
+            if (requestIdsList.length > 1) {
+                getListOfOpponents(requestIdsList);
+            } else {
+                try {
+                    Map<String, String> parameters = new HashMap<String, String>();
+                    parameters.put("fields", "ids, action_type, application, created_time, date, from, messages, object, to");
+                    GameRequest opponentRequest = new GameRequest();
+                    opponentRequest.createNewGameRequest("/" + requestIdsList[0], parameters, null);
+                    availableGames.put(Long.parseLong(requestIdsList[0]), (Game) new GraphRequests().execute(opponentRequest).get());
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                }
+                Intent board = new Intent(getApplicationContext(), Board.class);
+                board.putExtra("Level", Integer.parseInt(availableGames.get(Long.parseLong(requestIdsList[0])).data[9][3]));
+                board.putExtra("Player 1 Name", availableGames.get(availableGames.keySet().toArray()[0]).player1.playerName);
+                board.putExtra("Player 2 Name", availableGames.get(availableGames.keySet().toArray()[0]).player2.playerName);
+                if (availableGames.get(availableGames.keySet().toArray()[0]).lastMove.equals("X")) {
+                    board.putExtra("Pending Player", availableGames.get(availableGames.keySet().toArray()[0]).player1.playerFBID);
+                    board.putExtra("Current Player", availableGames.get(availableGames.keySet().toArray()[0]).player2.playerFBID);
+                } else {
+                    board.putExtra("Pending Player", availableGames.get(availableGames.keySet().toArray()[0]).player2.playerFBID);
+                    board.putExtra("Current Player", availableGames.get(availableGames.keySet().toArray()[0]).player1.playerFBID);
+                }
+                board.putExtra("Caller", "Index");
+                board.putExtra("My Turn", true);
+                board.putExtra("Finished", false);
+                board.putExtra("Multiplayer", true);
+                board.putExtra("GameRequestID", Long.parseLong(requestIdsList[0]));
+                startActivity(board);
+//                this.finish();
+            }
+        }
+//        if (getIntent().getFlags() == 335544320) {
+//            googlePlayGamesServicesActivity = true;
+//        }
+
+//		if (getIntent().getByteArrayExtra("Game") != null) {
+//            notificationMatch = getIntent().getByteArrayExtra("Game");
+//            notificationActivity = true;
+//        }
 		setContentView(R.layout.index);
-		
 		context = getApplicationContext();
-		
+
 		notificationManager = (NotificationManager) getSystemService(context.NOTIFICATION_SERVICE);
 		
 //		bindService(new Intent(context, NotificationService.class), serviceConnection, BIND_AUTO_CREATE);
 		startService(new Intent(context, NotificationService.class));
-		
-		RelativeLayout indexLayout = (RelativeLayout) findViewById(R.id.layout);
-		indexLayout.setBackgroundColor(Color.BLUE);
-		
+
+		RelativeLayout indexLayout = (RelativeLayout) findViewById(R.id.indexLayout);
+//		indexLayout.setBackgroundColor(Color.BLUE);
+
 		Display display = getWindowManager().getDefaultDisplay();
 		Point size = new Point();
 		display.getSize(size);
 		int width = size.x;
-		int height = size.y;
-		height *= 0.125;
 		
-		GridView game = (GridView) findViewById(R.id.game);
+		GridView game = (GridView) findViewById(R.id.introScreenBoard);
 		game.setAdapter(new IndexAdapter(this, width));
-		game.setBackgroundColor(Color.BLUE);
 		
 		Button play = (Button) findViewById(R.id.play_button);
-		play.setText("Play!");
-		play.setWidth(width);
-		play.setHeight(height);
-		play.setBackgroundColor(Color.WHITE);
-		play.setTextColor(Color.BLACK);
 		play.setOnClickListener(new View.OnClickListener() {		
 			@Override
 			public void onClick(View v) {
 				Intent mainmenu = new Intent(context, MainMenu.class);
 				startActivity(mainmenu);
+				index.finish();
 			}
 		});
 		
-		Log.d("bGAC", "Reached");
-		buildGoogleApiClient();
-
-		client.connect();
-		Log.d("Client", "Connected");
+//		Log.d("bGAC", "Reached");
+//		buildGoogleApiClient();
+//
+//		client.connect();
+//		Log.d("Client", "Connected");
 	}
 	
-	public void buildGoogleApiClient() {
-		client = new GoogleApiClient.Builder(this)
-		.addApi(Plus.API)
-		.addScope(Plus.SCOPE_PLUS_LOGIN)
-        .addScope(Plus.SCOPE_PLUS_PROFILE)
-		.addApi(Games.API)
-		.addScope(Games.SCOPE_GAMES)
-		.addApi(Drive.API)
-        .addScope(Drive.SCOPE_APPFOLDER)
-		.addConnectionCallbacks(this)
-		.addOnConnectionFailedListener(this)
-		.build();
-	}
+//	public void buildGoogleApiClient() {
+//		client = new GoogleApiClient.Builder(this)
+//		.addApi(Plus.API)
+//		.addScope(Plus.SCOPE_PLUS_LOGIN)
+//        .addScope(Plus.SCOPE_PLUS_PROFILE)
+//		.addApi(Games.API)
+//		.addScope(Games.SCOPE_GAMES)
+//		.addApi(Drive.API)
+//        .addScope(Drive.SCOPE_APPFOLDER)
+//		.addConnectionCallbacks(this)
+//		.addOnConnectionFailedListener(this)
+//		.build();
+//	}
+
+	private void getListOfOpponents(String [] requestIdsList) {
+	    int gamesCount = requestIdsList.length;
+	    int start = 0;
+	    if (requestIdsList[0].equals("user_friends")) {
+	        gamesCount -= 1;
+	        start += 1;
+        }
+        if (requestIdsList[0].equals("public_profile") || requestIdsList[1].equals("public_profile")) {
+	        gamesCount -= 1;
+	        start += 1;
+        }
+	    for (int i = start; i < requestIdsList.length; i++) {
+            try {
+                Map<String, String> parameters = new HashMap<String, String>();
+                parameters.put("fields", "ids, action_type, application, created_time, date, from, messages, object, to");
+                GameRequest opponentRequest = new GameRequest();
+                opponentRequest.createNewGameRequest("/" + requestIdsList[i], parameters, null);
+                Game game = (Game) new GraphRequests().execute(opponentRequest).get();
+                if (!game.lastMove.equals("")) {
+                    availableGames.put(Long.parseLong(requestIdsList[i]), game);
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
+        }
+        CharSequence[] opponents = new CharSequence[availableGames.size()];
+	    for (int i = 0; i < availableGames.size(); i++) {
+	        if (availableGames.get(availableGames.keySet().toArray()[i]).lastMove.equals("X")) {
+	            opponents[i] = availableGames.get(availableGames.keySet().toArray()[i]).player1.playerName;
+            } else if (availableGames.get(availableGames.keySet().toArray()[i]).lastMove.equals("O")) {
+	            opponents[i] = availableGames.get(availableGames.keySet().toArray()[i]).player2.playerName;
+            }
+        }
+        new AlertDialog.Builder(this)
+                .setTitle("Choose an Opponent")
+                .setItems(opponents, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int i) {
+                        // The 'which' argument contains the index position
+                        // of the selected item
+                        Intent board = new Intent(context, Board.class);
+                        board.putExtra("Level", Integer.parseInt(availableGames.get(availableGames.keySet().toArray()[i]).data[9][3]));
+                        board.putExtra("Player 1 Name", availableGames.get(availableGames.keySet().toArray()[i]).player1.playerName);
+                        board.putExtra("Player 2 Name", availableGames.get(availableGames.keySet().toArray()[i]).player2.playerName);
+                        if (availableGames.get(availableGames.keySet().toArray()[i]).lastMove.equals("X")) {
+                            board.putExtra("Pending Player", availableGames.get(availableGames.keySet().toArray()[i]).player1.playerFBID);
+                            board.putExtra("Current Player", availableGames.get(availableGames.keySet().toArray()[i]).player2.playerFBID);
+                        } else {
+                            board.putExtra("Pending Player", availableGames.get(availableGames.keySet().toArray()[i]).player2.playerFBID);
+                            board.putExtra("Current Player", availableGames.get(availableGames.keySet().toArray()[i]).player1.playerFBID);
+                        }
+                        board.putExtra("Caller", "Index");
+                        board.putExtra("My Turn", true);
+                        board.putExtra("Finished", false);
+                        board.putExtra("Multiplayer", true);
+                        board.putExtra("GameRequestID", availableGames.get(availableGames.keySet().toArray()[i]).requestID);
+                        index.finish();
+                        startActivity(board);
+                    }
+                })
+                .create()
+                .show();
+    }
 
 //	@Override
 //	public void onRestoreInstanceState(Bundle instanceState) {
@@ -210,7 +352,7 @@ GoogleApiClient.OnConnectionFailedListener, OnInvitationReceivedListener, OnTurn
 			board[i] = rows[i].split(",");
 		}
 
-        Log.d("bL", board[board.length - 1].toString());
+//        Log.d("bL", board[board.length - 1].toString());
 
 		return board[board.length - 1][6];
 	}
@@ -252,10 +394,10 @@ GoogleApiClient.OnConnectionFailedListener, OnInvitationReceivedListener, OnTurn
 //		
 //	}
 //
-	public void registerTurnBasedClient(GoogleApiClient currentClient) {
-		Log.d("rTBC", "Registering...");
-		Games.TurnBasedMultiplayer.registerMatchUpdateListener(currentClient, notificationService.getContext());	
-	}
+//	public void registerTurnBasedClient(GoogleApiClient currentClient) {
+////		Log.d("rTBC", "Registering...");
+//		Games.TurnBasedMultiplayer.registerMatchUpdateListener(currentClient, notificationService.getContext());
+//	}
 //
 //	@Override
 //	public void onInvitationReceived(Invitation arg0) {
@@ -327,13 +469,13 @@ GoogleApiClient.OnConnectionFailedListener, OnInvitationReceivedListener, OnTurn
 			lossIntent.putExtra("Winner", opponentName);
 
 			Games.TurnBasedMultiplayer.finishMatch(client, match.getMatchId());
-			Board.savedGameRecreate(match.getData(), context);
+			board.savedGameRecreate(match.getData());//, context);
 			
 			Board.keys = new Hashtable<Integer, Button>(6561);
-			Board.bottomPanel.removeAllViews();
-			Board.boardLayout.removeAllViews();
+//			Board.bottomPanel.removeAllViews();
+//			Board.boardLayout.removeAllViews();
 			ButtonPressed.currentTurn = "";
-			board.finishActivity(ButtonPressed.context, true, opponentName);
+			board.finishActivity(context, true, opponentName);
 		} else if ( currentPlayerParticipantResult != null && currentPlayerParticipantResult.getResult() == ParticipantResult.MATCH_RESULT_TIE) {
 			Intent tieIntent = new Intent(context, Winner.class);
 			tieIntent.putExtra("Match ID", match.getMatchId());
@@ -342,13 +484,13 @@ GoogleApiClient.OnConnectionFailedListener, OnInvitationReceivedListener, OnTurn
 			tieIntent.putExtra("Winner", "Tie");
 
 			Games.TurnBasedMultiplayer.finishMatch(client, match.getMatchId());
-			Board.savedGameRecreate(match.getData(), context);
+			board.savedGameRecreate(match.getData());//, context);
 			
 			Board.keys = new Hashtable<Integer, Button>(6561);
-			Board.bottomPanel.removeAllViews();
-			Board.boardLayout.removeAllViews();
+//			Board.bottomPanel.removeAllViews();
+//			Board.boardLayout.removeAllViews();
 			ButtonPressed.currentTurn = "";
-			board.finishActivity(ButtonPressed.context, true, "Tie");
+			board.finishActivity(context, true, "Tie");
 		} else if ( match.getTurnStatus() == TurnBasedMatch.MATCH_TURN_STATUS_MY_TURN) {
 			byte [] game = match.getData();
 			Intent turnIntent = new Intent(context, Board.class);
@@ -363,7 +505,7 @@ GoogleApiClient.OnConnectionFailedListener, OnInvitationReceivedListener, OnTurn
 			turnIntent.putExtra("Can Rematch", true);
 			turnIntent.putExtra("Multiplayer", true);
 
-			Board.savedGameRecreate(game, context);
+			board.savedGameRecreate(game);//, context);
 			
 			int level = Integer.parseInt(Board.wincheck[Board.wincheck.length - 1][5]);
 			int row = Integer.parseInt(Board.wincheck[Board.wincheck.length - 1][0]);
@@ -372,16 +514,16 @@ GoogleApiClient.OnConnectionFailedListener, OnInvitationReceivedListener, OnTurn
 			int key = row * multiplier + column;
 			
 			String turn = "";
-			
+			TextView playerTurn = board.findViewById(R.id.player_turn);
 			if ( (match.getParticipant(getCurrentParticipantId(game)).getDisplayName()).equals(Board.wincheck[Board.wincheck.length - 1][2]) ) {
 				Board.wincheck[Board.wincheck.length - 1][4] = "X";
 				turn = "O";
-				ButtonPressed.playerturn.setText(Board.wincheck[Board.wincheck.length - 1][2] + "'s Turn");
+				playerTurn.setText(Board.wincheck[Board.wincheck.length - 1][2] + "'s Turn");
 			}
 			else if ( (match.getParticipant(getCurrentParticipantId(game)).getDisplayName()).equals(Board.wincheck[Board.wincheck.length - 1][3]) ) {
 				Board.wincheck[Board.wincheck.length - 1][4] = "O";
 				turn = "X";
-				ButtonPressed.playerturn.setText(Board.wincheck[Board.wincheck.length - 1][3] + "'s Turn");
+				playerTurn.setText(Board.wincheck[Board.wincheck.length - 1][3] + "'s Turn");
 			}
 			
 			ButtonPressed.currentTurn = Board.wincheck[Board.wincheck.length - 1][4];
@@ -398,7 +540,7 @@ GoogleApiClient.OnConnectionFailedListener, OnInvitationReceivedListener, OnTurn
 			opponentMove.setText(turn);
 			opponentMove.setEnabled(false);
 			
-			bp = new ButtonPressed(ButtonPressed.context, level);
+			bp = new ButtonPressed(context, level, availableGames.get(availableGames.keySet().toArray()[0]), board);
 			
 			if( level >= 2) {
 				bp.boardChanger(row, column, level, true);
@@ -422,22 +564,22 @@ GoogleApiClient.OnConnectionFailedListener, OnInvitationReceivedListener, OnTurn
 
 	@Override
 	public void onTurnBasedMatchRemoved(String arg0) {
-		Log.d("TBMR", "onTurnBasedMatchRemoved " + arg0);
+//		Log.d("TBMR", "onTurnBasedMatchRemoved " + arg0);
 	}
 
 	@Override
 	public void onInvitationReceived(Invitation arg0) {
-		Log.d("IR", "onInvitationReceived");
+//		Log.d("IR", "onInvitationReceived");
 	}
 
 	@Override
 	public void onInvitationRemoved(String arg0) {
-		Log.d("IR", "onInvitationRemoved");
+//		Log.d("IR", "onInvitationRemoved");
 	}
 
 	@Override
 	public void onConnectionFailed(ConnectionResult result) {
-		Log.d("CF", "onConnectionFailed");
+//		Log.d("CF", "onConnectionFailed");
 		if (resolvingError) {
             // Already attempting to resolve an error.
             return;
@@ -459,10 +601,10 @@ GoogleApiClient.OnConnectionFailedListener, OnInvitationReceivedListener, OnTurn
 
 	@Override
 	public void onConnected(Bundle connectionHint) {
-		Log.d("C", "" + connectionHint);
+//		Log.d("C", "" + connectionHint);
 		SharedPreferences savedGame = PreferenceManager.getDefaultSharedPreferences(context);
 		if(connectionHint != null) {
-            Log.d("cH", "not null");
+//            Log.d("cH", "not null");
 			match = connectionHint.getParcelable(Multiplayer.EXTRA_TURN_BASED_MATCH);
 //			Log.d("Match", "Received!");
 			
@@ -477,7 +619,7 @@ GoogleApiClient.OnConnectionFailedListener, OnInvitationReceivedListener, OnTurn
 					myTurn = true;
 				}
 				
-//				Toast display = Toast.makeText(getApplicationContext(), "Turn Based Match Received", Toast.LENGTH_SHORT);
+//				Toast display = Toast.makeText(context, "Turn Based Match Received", Toast.LENGTH_SHORT);
 //				display.show();
 				
 				Intent board = new Intent(this, Board.class);
@@ -527,8 +669,8 @@ GoogleApiClient.OnConnectionFailedListener, OnInvitationReceivedListener, OnTurn
 			}
 			Log.d("gS", gameString);
 			if ( gameString.contains("X") || gameString.contains("O") ) {
-				Intent board = new Intent(getApplicationContext(), Board.class);
-				board.putExtra("On Going Match", game);
+				Intent board = new Intent(context, Board.class);
+//				board.putExtra("On Going Match", game);
 				board.putExtra("Level", getLevel(game));
                 Log.d("MatchID", getMatchId(game));
 				board.putExtra("Match ID", getMatchId(game));
@@ -563,18 +705,21 @@ GoogleApiClient.OnConnectionFailedListener, OnInvitationReceivedListener, OnTurn
 	@Override
     public void onActivityResult(int request, int response, Intent data) {
         super.onActivityResult(request, response, data);
-        
+        super.onActivityResult(request, response, data);
+
         if (request == REQUEST_RESOLVE_ERROR) {
         	client.connect();
-        }
+        } else {
+			loginCallbackManager.onActivityResult(request, response, data);
+		}
     }
 	
 	private String getPendingParticipantId(TurnBasedMatch match) {
 		ArrayList<String> participantIds = match.getParticipantIds();
 		String pendingParticipantId = "";
 		String currentParticipantId = match.getParticipantId(Games.Players.getCurrentPlayerId(client));
-		Log.d("cPId", currentParticipantId);
-        Log.d("pIds", "" + participantIds);
+//		Log.d("cPId", currentParticipantId);
+//        Log.d("pIds", "" + participantIds);
 		if( currentParticipantId.equals( participantIds.get(0) ) ) {
 			pendingParticipantId = participantIds.get(1);
 		}

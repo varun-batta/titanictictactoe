@@ -4,24 +4,32 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:orientation="vertical"
-    android:id="@+id/layout">
+    android:id="@+id/indexLayout"
+    android:background="@color/colorBlue">
     
     <GridView
-        android:id="@+id/game"
+        android:id="@+id/introScreenBoard"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:horizontalSpacing="5dp"
+        android:horizontalSpacing="10dp"
         android:numColumns="3"
         android:padding="10dp"
-        android:verticalSpacing="5dp" >
+        android:verticalSpacing="10dp">
     </GridView>
     
     <Button
     	android:id="@+id/play_button"
-    	android:layout_width="wrap_content"
-    	android:layout_height="wrap_content"
-        android:layout_below="@+id/game"
-        android:layout_centerHorizontal="true" />
+    	android:layout_width="fill_parent"
+    	android:layout_height="50dp"
+        android:layout_below="@+id/introScreenBoard"
+        android:layout_centerHorizontal="true"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:background="@color/colorWhite"
+        android:text="@string/playButtonText"
+        android:textColor="@color/colorBlack"
+        android:textAllCaps="false"
+        android:textSize="20dp" />
     
 </RelativeLayout>    

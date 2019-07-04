@@ -92,7 +92,7 @@ public class LevelMenu extends Activity implements ConnectionCallbacks, OnConnec
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.menu);
+		setContentView(R.layout.levelmenu);
 		
 		context = getApplicationContext();
 		
@@ -111,7 +111,7 @@ public class LevelMenu extends Activity implements ConnectionCallbacks, OnConnec
         .addOnConnectionFailedListener(this)
         .build();
 		
-		LinearLayout menu = (LinearLayout) findViewById(R.id.menuLayout);
+		LinearLayout menu = (LinearLayout) findViewById(R.id.levelMenuLayout);
 		TextView welcome = new TextView(context);
 		TextView title = new TextView(context);
 		if ( multiplayer ) {
@@ -145,7 +145,7 @@ public class LevelMenu extends Activity implements ConnectionCallbacks, OnConnec
 //				
 //			}
 //		});
-//		menu.addView(instructions);
+//		levelmenu.addView(instructions);
 		
 		playerNamesLayout = new LinearLayout(context);
 		playerNamesLayout.setOrientation(LinearLayout.VERTICAL);
@@ -312,7 +312,7 @@ public class LevelMenu extends Activity implements ConnectionCallbacks, OnConnec
 //				levels(levelChoice);
 //			}
 //		});
-//		menu.addView(multiplayer);
+//		levelmenu.addView(multiplayer);
 		
 		
 	}
@@ -330,8 +330,8 @@ public class LevelMenu extends Activity implements ConnectionCallbacks, OnConnec
 		}
 		if(caller.equals("Board") || caller.equals("Winner")) {
 			Board.keys = new Hashtable<Integer, Button>(6561);	
-			Board.bottomPanel.removeAllViews();
-			Board.boardLayout.removeAllViews();
+//			Board.bottomPanel.removeAllViews();
+//			Board.boardLayout.removeAllViews();
 			ButtonPressed.wincheck = new String [10][9];
 			ButtonPressed.metawincheck = new String [3][3];
 			Board.wincheck = new String [10][9];

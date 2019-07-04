@@ -1,15 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <!--Administrative Details-->
     <string name="app_name">Titanic Tic Tac Toe</string>
     <string name="app_id">15248927065</string>
+    <string name="facebook_app_id">267430880368292</string>
+    <string name="fb_login_protocol_scheme">fb267430880368292</string>
+    <!--Title Page-->
     <string name="tic">Tic</string>
     <string name="tac">Tac</string>
     <string name="toe">Toe</string>
-    <string name="instructions">Please enter      the player\'s names below:</string>
-    <string name="guide">This is the enhanced version of Tic-Tac-Toe. Enjoy!</string>
-    <string name="player1">Player 1</string>
-    <string name="player2">Player 2</string>
-    <string name="facebook_app_id">267430880368292</string>
-
+    <string name="guide">Tic-Tac-Toe to the next level. Enjoy!</string>
+    <string name="playButtonText">Play</string>
+    <!--Main Menu-->
+    <string name="welcome">Welcome!</string>
+    <string name="mainMenuTitle">Main Menu</string>
+    <string name="instructionsButtonText">Instructions</string>
+    <string name="level1ButtonText">n = 1</string>
+    <string name="level2ButtonText">n = 2</string>
+    <string name="level3ButtonText">n = 3</string>
+    <string name="level4ButtonText">n = 4</string>
+    <string name="savedGamesButtonText">Games Being Played</string>
+    <!--Player Selector View-->
+    <string name="playerSelectorTitle">Players</string>
+    <string name="playerSelectorYourNameInstructions">Please enter your name below:</string>
+    <string name="yourNamePrompt">Your Name</string>
+    <string name="localGameButton">Play Locally</string>
+    <string name="facebookGameButton">Play over Facebook</string>
+    <string name="theirNamePrompt">Their Name</string>
+    <string name="inviteFriendsText">Want to play with friend over Facebook? Invite them to install the app too!</string>
+    <!--Winner View-->
+    <string name="rematchButton">Rematch?</string>
+    <string name="mainMenuButton">Main Menu</string>
+    <string name="viewGameButton">View Game</string>
+    <!--Current Games View-->
+    <string name="currentGamesTitle">Active Games</string>
+    <string name="savedGamesButton">View Locally Saved Games</string>
+    <string name="facebookHeader">On Facebook:</string>
+    <string name="localHeader">Local:</string>
 </resources>

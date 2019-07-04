@@ -14,6 +14,8 @@ import android.widget.AbsListView.LayoutParams;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import static com.varunbatta.titanictictactoe.Board.game;
+
 public class BoardAdapter extends BaseAdapter {
 	private boolean savedGame = false;
 	private Context context;
@@ -44,7 +46,7 @@ public class BoardAdapter extends BaseAdapter {
 		this.key = key;
 		this.savedGame = savedGame;
 //		Log.d("BA", "BoardAdapter");
-		bp = new ButtonPressed(context, actual);
+		bp = new ButtonPressed(context, actual, game, new Board());
 	}
 	
 	@Override

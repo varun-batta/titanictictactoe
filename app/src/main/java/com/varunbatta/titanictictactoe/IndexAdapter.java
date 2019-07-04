@@ -54,26 +54,27 @@ public class IndexAdapter extends BaseAdapter{
 		//View gridView;
 		
 		switch(position){
-			case 0: tv.setText("Tic");
+			case 0: tv.setText(R.string.tic);
 					tv.setTextSize(40);
 			break;
-			case 1: tv.setText("Tac");
+			case 1: tv.setText(R.string.tac);
 					tv.setTextSize(40);
 			break;
-			case 2: tv.setText("Toe");
+			case 2: tv.setText(R.string.toe);
 					tv.setTextSize(40);
 			break;
 //			case 3: tv.setText("This is the enhanced version of Tic-Tac-Toe. Enjoy!");
-			case 4: tv.setText("This is the enhanced version of Tic-Tac-Toe. Enjoy!");
+			case 4: tv.setText(R.string.guide);
 			break;
 //			case 5: tv.setText("Please enter the player's names below:");
 //			break;
 		}
 		
-		tv.setWidth(screenWidth/3 - 15);
-		tv.setHeight(screenWidth/3);
+		tv.setWidth((screenWidth - 40)/3);
+		tv.setHeight((screenWidth - 40)/3);
 		tv.setGravity(Gravity.CENTER);
-		tv.setBackgroundColor(Color.rgb(0, 153, 153));
+		tv.setTextColor(context.getResources().getColor(R.color.colorBlack));
+		tv.setBackgroundColor(context.getResources().getColor(R.color.colorGreen));
 		
 		return tv;
 	}
