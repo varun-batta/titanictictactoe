@@ -1,24 +1,11 @@
 package com.varunbatta.titanictictactoe;
 
-import com.facebook.FacebookButtonBase;
-import com.facebook.login.widget.LoginButton;
-import com.varunbatta.titanictictactoe.R;
-
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
-import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
-import android.widget.LinearLayout;
-import android.widget.PopupWindow;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
 public class MainMenu extends Activity {

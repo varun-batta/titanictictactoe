@@ -1,13 +1,6 @@
 package com.varunbatta.titanictictactoe;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import android.content.Context;
-import android.graphics.Color;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.view.View;
@@ -16,12 +9,12 @@ import android.view.animation.AlphaAnimation;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.facebook.share.model.GameRequestContent;
-import com.facebook.share.widget.GameRequestDialog;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.games.multiplayer.ParticipantResult;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ButtonPressed implements OnClickListener {
     Context context;

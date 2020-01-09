@@ -1,7 +1,5 @@
 package com.varunbatta.titanictictactoe;
 
-import com.varunbatta.titanictictactoe.R;
-
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;

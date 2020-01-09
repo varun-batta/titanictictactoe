@@ -1,14 +1,5 @@
 package com.varunbatta.titanictictactoe;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
-
 import android.app.Activity;
 import android.app.NotificationManager;
 import android.content.ComponentName;
@@ -18,9 +9,6 @@ import android.content.Intent;
 import android.content.IntentSender.SendIntentException;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.Signature;
 import android.graphics.Point;
 import android.net.Uri;
 import android.os.Bundle;
@@ -40,11 +28,11 @@ import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
+import com.facebook.applinks.AppLinks;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.drive.Drive;
 import com.google.android.gms.games.Games;
 import com.google.android.gms.games.multiplayer.Invitation;
 import com.google.android.gms.games.multiplayer.Multiplayer;
@@ -52,11 +40,13 @@ import com.google.android.gms.games.multiplayer.OnInvitationReceivedListener;
 import com.google.android.gms.games.multiplayer.ParticipantResult;
 import com.google.android.gms.games.multiplayer.turnbased.OnTurnBasedMatchUpdateReceivedListener;
 import com.google.android.gms.games.multiplayer.turnbased.TurnBasedMatch;
-import com.google.android.gms.plus.Plus;
 
-import bolts.AppLinks;
-
-//import static com.varunbatta.titanictictactoe.Board.player2;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 public class Index<match> extends Activity implements GoogleApiClient.ConnectionCallbacks, 
 GoogleApiClient.OnConnectionFailedListener, OnInvitationReceivedListener, OnTurnBasedMatchUpdateReceivedListener {
@@ -130,7 +120,7 @@ GoogleApiClient.OnConnectionFailedListener, OnInvitationReceivedListener, OnTurn
 		LoginManager.getInstance().logInWithReadPermissions(this, Arrays.asList("public_profile", "email", "user_friends"));
 
 
-		Uri targetUrl = AppLinks.getTargetUrlFromInboundIntent(this, getIntent());
+		Uri targetUrl = null; //AppLinks.getTargetUrlFromInboundIntent(this.context, getIntent());
         if (targetUrl != null) {
             Log.i("Activity", "App Link Target URL: " + targetUrl.toString());
             facebookGame = true;

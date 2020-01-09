@@ -1,7 +1,5 @@
 package com.varunbatta.titanictictactoe;
 
-import com.facebook.GraphResponse;
-
 /**
  * Created by varun on 3/1/2018.
  */
