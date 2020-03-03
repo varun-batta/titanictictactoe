@@ -51,7 +51,6 @@ public class GraphRequests extends AsyncTask<GameRequest, Void, Object> {
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
-
                         }
                     });
             Bundle parameters = new Bundle();
