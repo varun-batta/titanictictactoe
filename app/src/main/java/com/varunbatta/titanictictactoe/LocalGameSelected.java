@@ -9,10 +9,10 @@ import android.widget.Button;
 import android.widget.EditText;
 
 public class LocalGameSelected extends Fragment {
+    // TODO: Make this view better looking, fix the positions and the views in general
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         View layout = inflater.inflate(R.layout.local_game_selected, container, false);
 
         final EditText opponentNameEditText = layout.findViewById(R.id.opponentName);

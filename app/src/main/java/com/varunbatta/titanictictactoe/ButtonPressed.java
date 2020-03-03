@@ -17,18 +17,19 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ButtonPressed implements OnClickListener {
-    Context context;
+    // TODO: See if all these variables are required (or is there a better way to keep the global state)
+	Context context;
     Game game;
 	static int level;
 	static String turn = "";
-	static String wincheck[][] = new String [10][9];
-	static String metawincheck[][] = new String [3][3];
+	static String winCheck[][] = new String [10][9];
+	static String metaWinCheck[][] = new String [3][3];
 	private int row = -1;
     private int column = -1;
 	static String currentTurn = "";
-    private TextView winningletter;
+    private TextView winningLetter;
 	Board board;
-	TextView playerturn;
+	TextView playerTurn;
 
 	private AlphaAnimation inAnimation;
     private AlphaAnimation outAnimation;
@@ -38,47 +39,54 @@ public class ButtonPressed implements OnClickListener {
 		ButtonPressed.level = level;
 		this.game = game;
 		this.board = board;
-        this.playerturn = board.findViewById(R.id.player_turn);
-		winningletter = new TextView(context);
+        this.playerTurn = board.findViewById(R.id.player_turn);
+		winningLetter = new TextView(context);
 	}
 	
 	private int boardSize(double level) {
-		return (int)Math.pow(3, level);
+		return (int) Math.pow(3, level);
 	}
 
 	@Override
 	public void onClick(View v) {
+		// Determine currentTurn based on lastMove
+		// TODO: Clean this code up
 		currentTurn = game.lastMove.equals("") ? "X" : game.lastMove.equals("X") ? "O" : "X";
-		wincheck = game.data;
+		winCheck = game.data;
 		Button pressedButton = (Button) v;
 		String pressedButtonText = pressedButton.getText().toString();
 		board = new Board();
 		
-		//TODO: Refactor this function!!
-		if((pressedButtonText.equals("Menu") || pressedButtonText.equals("Save") ||
-				pressedButtonText.equals("Main Menu") || pressedButtonText.equals("New Game") || pressedButtonText.equals("New WiFi Game")) || 
+		// TODO: Cleanup this code (just make the bottomPanelListener the buttonPressed action for these buttons)
+		if ((pressedButtonText.equals("Menu") || pressedButtonText.equals("Save") ||
+				pressedButtonText.equals("Main Menu") || pressedButtonText.equals("New Game") || pressedButtonText.equals("New WiFi Game")) ||
 				pressedButtonText.equals("Back")) {
 			board.bottomPanelListener(context, pressedButtonText);
 			return;
 		}
-		if(currentTurn.equals("X")) {
+
+		// Depending on the value of currentTurn, set the associated global variable values
+		// TODO: Make this cleaner, not based off of currentTurn
+		// TODO: The playerTurn text should be set using string formatting instead
+		if (currentTurn.equals("X")) {
 			turn = "X";
-			playerturn.setText(game.player2.playerName + "'s Turn!");
+			playerTurn.setText(game.player2.playerName + "'s Turn!");
 			currentTurn = "O";
-		}
-		else {
+		} else {
 			turn = "O";
-			playerturn.setText(game.player1.playerName + "'s Turn!");
+			playerTurn.setText(game.player1.playerName + "'s Turn!");
 			currentTurn = "X";
 		}
 		pressedButton.setText(turn);
 		game.lastMove = turn;
 		pressedButton.setEnabled(false);
 
-
-		if(level == 1){
-			for(int i = 0; i<3; i++){
-				for(int j = 0; j<3; j++){
+		// TODO: Clean up the logic to find the row and column of the associated button (perhaps using the button ID?)
+		// Handle level 1
+		if (level == 1) {
+			// Loop through all buttons to find the currently selected button
+			for (int i = 0; i < 3; i++) {
+				for (int j = 0; j < 3; j++) {
 					Button selectedButton = Board.keys.get(i*3+j);
 					if (selectedButton.getId() == pressedButton.getId()) {
 						row = i;
@@ -88,14 +96,16 @@ public class ButtonPressed implements OnClickListener {
 			}
 		}
 
+		// Handle level 2
 		boolean found = false;
-
-		if(level == 2){
-			for(int i = 0; i<9; i++){
-				for(int j = 0; j<9; j++){
-					if(metawincheck[i/3][j/3] == null) {
-						Button selectedButton = Board.keys.get(i*9+j);
-						if(selectedButton.getId() == pressedButton.getId()){
+		if (level == 2) {
+			// Loop through all buttons to find the currently selected button
+			for (int i = 0; i < 9; i++) {
+				for (int j = 0; j < 9; j++) {
+					// Only need to check the buttons that are visible
+					if (metaWinCheck[i / 3][j / 3] == null) {
+						Button selectedButton = Board.keys.get(i * 9 + j);
+						if (selectedButton.getId() == pressedButton.getId()) {
 							row = i;
 							column = j;
 							found = true;
@@ -103,29 +113,38 @@ public class ButtonPressed implements OnClickListener {
 						}
 					}
 				}
-				if(found) {
+				// Don't keep searching if found
+				// TODO: See if there's an easier way to break from a double loop
+				if (found) {
 					break;
 				}
 			}
 		}
 
-		if(Board.multiplayer) {
-			Board.wincheck[row][column] = turn;
+		// TODO: See if this is necessary or if one shared data will make this better
+		if (Board.multiplayer) {
+			Board.winCheck[row][column] = turn;
 		}
-		wincheck[row][column] = turn;
+		winCheck[row][column] = turn;
 
-		wincheck[wincheck.length-1][0] = Integer.toString(row);
-		wincheck[wincheck.length-1][1] = Integer.toString(column);
-		wincheck[wincheck.length-1][2] = game.player1.playerName;
-		wincheck[wincheck.length-1][3] = game.player2.playerName;
-		wincheck[wincheck.length-1][4] = turn;
-		wincheck[wincheck.length-1][5] = "" + level;
+		// Last row of winCheck contains the data required for game recreation
+		winCheck[winCheck.length-1][0] = Integer.toString(row);
+		winCheck[winCheck.length-1][1] = Integer.toString(column);
+		winCheck[winCheck.length-1][2] = game.player1.playerName;
+		winCheck[winCheck.length-1][3] = game.player2.playerName;
+		winCheck[winCheck.length-1][4] = turn;
+		winCheck[winCheck.length-1][5] = "" + level;
 
+		// Change board as required
 		boardChanger(row, column, Board.level, !Board.multiplayer);
 
-		boolean winOrTie = winChecker(row, column, Board.level, Board.level, wincheck, "");
+		// See if there is a victory
+		boolean winOrTie = winChecker(row, column, Board.level, Board.level, winCheck, "");
 
-		if(Board.multiplayer) {
+		// Handle multiplayer case to send game request via Facebook
+		if (Board.multiplayer) {
+			// Determine player information
+			// TODO: See if this can be better done
 			Player toPlayer;
 			Player fromPlayer;
 			if (turn.equals("X")) {
@@ -135,10 +154,12 @@ public class ButtonPressed implements OnClickListener {
 				toPlayer = game.player1;
 				fromPlayer = game.player2;
 			}
+
+			// Determine message and title text
 			String messageText;
 			String titleText;
 			//TODO: Consider first turn case
-			if (winChecker(row, column, 1, Board.level, level == 2 ? metawincheck : wincheck, "")) {
+			if (winChecker(row, column, 1, Board.level, level == 2 ? metaWinCheck : winCheck, "")) {
 				messageText = fromPlayer.playerName + " has won the game!";
 				titleText = "Game Over";
 				Board.winOrTie = winOrTie;
@@ -147,8 +168,10 @@ public class ButtonPressed implements OnClickListener {
 				messageText = fromPlayer.playerName + " has played and now it is your turn";
 				titleText = "Your Turn";
 			}
-			String game = wincheckerToString();
-			Map<String, String> params = new HashMap<String, String>();
+
+			// Turn game into passable data and make Facebook turn
+			String game = winCheckerToString();
+			Map<String, String> params = new HashMap<>();
 			params.put("data", game);
 			params.put("message", messageText);
 			params.put("title", titleText);
@@ -156,57 +179,62 @@ public class ButtonPressed implements OnClickListener {
 		}
 	}
 
-	private String wincheckerToString() {
+	// TODO: Fix the names!!
+	/*
+	 * winCheckerToString converts winCheck to a string where each column is separated by a column and each row separated by a semicolon
+	 */
+	private String winCheckerToString() {
 		StringBuilder game = new StringBuilder();
+		// Populate the game string with all values from the winCheck array
 		for (int i = 0; i < 9; i++) {
 			for (int j = 0; j < 9; j++) {
-				if (wincheck[i][j] != null) {
-                    game.append(wincheck[i][j]);
+				if (winCheck[i][j] != null) {
+                    game.append(winCheck[i][j]);
                 }
                 game.append(",");
 			}
 			game.append(";");
 		}
-		game.append(wincheck[wincheck.length - 1][0]).append(",");
-		game.append(wincheck[wincheck.length - 1][1]).append(",");
-		game.append(wincheck[wincheck.length - 1][4]).append(",");
+		// Add a few more values for the last move made
+		// TODO: Does this need to be done separately?
+		game.append(winCheck[winCheck.length - 1][0]).append(",");
+		game.append(winCheck[winCheck.length - 1][1]).append(",");
+		game.append(winCheck[winCheck.length - 1][4]).append(",");
 		game.append(level).append(",,,,,,;");
 		return game.toString();
 	}
 
-	public void boardChanger(int f, int g, int n, boolean clickable) {
-		//TODO: Refactor this function completely!!!
-        int m = f;
-        int h = g;
-        int l = boardSize(n) / 3;
-        int r = l / 3;
+	public void boardChanger(int rowIndex, int columnIndex, int level, boolean clickable) {
+		// TODO: Refactor this function completely!!!!
+		// Determine some base numbers for the boardSize and associated indices
+		int miniBoardSize = boardSize(level) / 3;
+		int metaRowIndex = rowIndex % miniBoardSize;
+        int metaColumnIndex = columnIndex % miniBoardSize;
 
-        String bcwincheck[][] = new String[l][l];
-        if (n == 2) {
-            bcwincheck = metawincheck;
-        }
-
-        m = m % l;
-        h = h % l;
-
-        if (n == 1) {
-            for (int i = 0; i < 3; i++) {
+        if (level == 1) {
+            // Handle level 1, which is literally nothing technically
+        	for (int i = 0; i < 3; i++) {
                 for (int j = 0; j < 3; j++) {
                     int key = i * 3 + j;
                     Button button = Board.keys.get(key);
                     button.setClickable(clickable);
                 }
             }
-        } else {
-            if (bcwincheck[m][h] == null && !tieChecker("Inner", n, m, h)) {
-                for (int i = 0; i < 3; i++) {
+        } else if (level == 2) {
+        	// Handle level 2
+            if (metaWinCheck[metaRowIndex][metaColumnIndex] == null && !tieChecker("Inner", level, metaRowIndex, metaColumnIndex)) {
+                // Handle it if this part of the view is accessible and doesn't unlock the entire board
+            	// Loop through all the cells of the metaBoard and handle depending on their status
+				for (int i = 0; i < 3; i++) {
                     for (int j = 0; j < 3; j++) {
-                        if (bcwincheck[i][j] == null) {
-                            if (n == 2) {
+                        if (metaWinCheck[i][j] == null) {
+                        	// If this section of the metaBoard has not been won (so should be usable)
+                            // TODO: Clean this up!! Make the checks more straightforward rather than repeated nested checks
+							if (level == 2) {
                                 for (int k = 0; k < 9; k++) {
                                     for (int o = 0; o < 9; o++) {
                                         int key = k * 9 + o;
-                                        if (bcwincheck[k / 3][o / 3] == null) {
+                                        if (metaWinCheck[k / 3][o / 3] == null) {
                                             Button button = Board.keys.get(key);
                                             button.setEnabled(false);
                                             ImageView section = BasicBoardView.metaBoard[k / 3][o / 3].findViewById(R.id.boardBackgroundRed);
@@ -218,10 +246,10 @@ public class ButtonPressed implements OnClickListener {
                         }
                         for (int p = 0; p < 3; p++) {
                             for (int q = 0; q < 3; q++) {
-                                Button button = Board.keys.get((m % 3) * 27 + p * 9 + (h % 3) * 3 + q);
+                                Button button = Board.keys.get((metaRowIndex % 3) * 27 + p * 9 + (metaColumnIndex % 3) * 3 + q);
                                 if (button != null && button.getText().toString().equals("")) {
                                     button.setEnabled(true);
-                                    ImageView selectedSection = BasicBoardView.metaBoard[m][h].findViewById(R.id.boardBackgroundRed);
+                                    ImageView selectedSection = BasicBoardView.metaBoard[metaRowIndex][metaColumnIndex].findViewById(R.id.boardBackgroundRed);
                                     selectedSection.setImageAlpha(0);
                                     if (Board.multiplayer) {
                                         button.setClickable(clickable);
@@ -234,7 +262,7 @@ public class ButtonPressed implements OnClickListener {
             } else {
                 for (int i = 0; i < 9; i++) {
                     for (int j = 0; j < 9; j++) {
-                        if (bcwincheck[i / 3][j / 3] == null) {
+                        if (metaWinCheck[i / 3][j / 3] == null) {
                             Button button = Board.keys.get(i * 9 + j);
                             if (button != null && (button.getText() == null || button.getText().toString().equals(""))) {
                                 button.setEnabled(true);
@@ -249,270 +277,197 @@ public class ButtonPressed implements OnClickListener {
         }
     }
 	
-	public boolean tieChecker(String checking, int n, int m, int h) {
-        int q = 0;
-        int u = 0;
-        int t = 0;
+	public boolean tieChecker(String checking, int level, int rowIndex, int columnIndex) {
+        // TODO: Refactor this function as necessary
+		int filledMetaCellCount = 0;
+        int filledCellCount = 0;
 
-        if (n == 1 && checking.equals("Inner")) {
+        if (level == 1 && checking.equals("Inner")) {
             for (int i = 0; i < 3; i++) {
                 for (int j = 0; j < 3; j++) {
                     Button button = Board.keys.get(i * 3 + j);
                     if (button != null && !button.getText().toString().equals("")) {
-                        u++;
+                        filledCellCount++;
                     }
                 }
             }
         }
-        if (n == 2 && checking.equals("Inner") && metawincheck[m % 3][h % 3] == null) {
+
+        if (level == 2 && checking.equals("Inner") && metaWinCheck[rowIndex % 3][columnIndex % 3] == null) {
             for (int i = 0; i < 3; i++) {
                 for (int j = 0; j < 3; j++) {
-                    Button button = Board.keys.get((m % 3) * 27 + i * 9 + (h % 3) * 3 + j);
+                    Button button = Board.keys.get((rowIndex % 3) * 27 + i * 9 + (columnIndex % 3) * 3 + j);
                     if (button != null && !button.getText().toString().equals("")) {
-                        u++;
+                        filledCellCount++;
                     }
                 }
             }
         }
-        if (n == 2 && checking.equals("Outer")) {
+
+        if (level == 2 && checking.equals("Outer")) {
             for (int i = 0; i < 3; i++) {
                 for (int j = 0; j < 3; j++) {
-                    if (metawincheck[i][j] == null) {
+                    if (metaWinCheck[i][j] == null) {
                         for (int k = 0; k < 3; k++) {
                             for (int o = 0; o < 3; o++) {
                                 Button button = Board.keys.get(i * 27 + k * 9 + j * 3 + o);
                                 if (button != null && !button.getText().toString().equals("")) {
-                                    u++;
+                                    filledCellCount++;
                                 }
                             }
                         }
                     } else {
-                        q++;
+                        filledMetaCellCount++;
                     }
                 }
             }
         }
 
-        return checking.equals("MetaOuter") && (q * 81 + u * 9 + t) == 729 || checking.equals("Outer") && (q * 9 + u) == 81 || checking.equals("Inner") && u == 9;
+        return checking.equals("Outer") && (filledMetaCellCount * 9 + filledCellCount) == 81 || checking.equals("Inner") && filledCellCount == 9;
     }
 
-	public boolean winChecker(int f, int g, int n, int actual, String[][] winchecker, String turnValue) {
-		//TODO: Refactor this function
+	public boolean winChecker(int rowIndex, int columnIndex, int testLevel, int actualLevel, String[][] winChecker, String turnValue) {
+		// TODO: Refactor this function
 		boolean winOrTie = false;
 		String value = "";
 		String value1 = "";
 		String value2 = "";
 		String x = "";
-		int q = -1;
-		int r = -1;
-//		int length = winchecker.length;
-//		int width = winchecker[0].length;
-		
-		if(n==3&&actual==4){ 
-			q = f;
-			r = g;
-			f=f/3;
-			g=g/3;}
-		if(n==2&&actual>=3){
-			q=f;
-			r=g;
-			f=f/3;
-			g=g/3;}
-		if(n==1&&actual>=2){
-			q=f;
-			r=g;
-			f=f/3;
-			g=g/3;}
-		
-		if(f%3==0){
-			value = winchecker[f][g];
-			value1 = winchecker[f+1][g];
-			value2 = winchecker[f+2][g];
-		}
-		else{
-			if(f%3==1){
-				value = winchecker[f-1][g];
-				value1 = winchecker[f][g];
-				value2 = winchecker[f+1][g];
-				}
-			else{
-				if(f%3==2){
-					value = winchecker[f-2][g];
-					value1 = winchecker[f-1][g];
-					value2 = winchecker[f][g];
-				}
-			}
-		}
-		if(value != null && value1 != null && value2 != null) {
-			if(value.equals(value1) && value1.equals(value2)){
-				if(turnValue.equals(""))
-					x = turn;
-				else
-					x = turnValue;
-			}
-		}
-		
-		if(g%3==0){
-			value = winchecker[f][g];
-			value1 = winchecker[f][g+1];
-			value2 = winchecker[f][g+2];
-			}
-		else{
-			if(g%3==1){
-				value = winchecker[f][g-1];
-				value1 = winchecker[f][g];
-				value2 = winchecker[f][g+1];
-			}
-			else{
-				if(g%3==2){
-					value = winchecker[f][g-2];
-					value1 = winchecker[f][g-1];
-					value2 = winchecker[f][g];
-				}
-			}}
-		
-		
-		if(value != null && value1 != null && value2 != null){
-			if(value.equals(value1) && value1.equals(value2)){
-				if(turnValue.equals(""))
-					x = turn;
-				else
-					x = turnValue;
-			}
-		}
-		
-		if(f%3==0&&g%3==0){
-			value = winchecker[f][g];
-			value1 = winchecker[f+1][g+1];
-			value2 = winchecker[f+2][g+2];}
-		else{
-			if(f%3==1&&g%3==1){
-				value = winchecker[f-1][g-1];
-				value1 = winchecker[f][g];
-				value2 = winchecker[f+1][g+1];
-			}			
-			else{
-				if(f%3==2&&g%3==2){
-					value = winchecker[f-2][g-2];
-					value1 = winchecker[f-1][g-1];
-					value2 = winchecker[f][g];
-				}
-			}
+
+		if (testLevel == 1 && actualLevel >= 2) {
+			rowIndex=rowIndex/3;
+			columnIndex=columnIndex/3;
 		}
 
-		if(value != null && value1 != null && value2 != null){
-			if(value.equals(value1) && value1.equals(value2)){
-				if(turnValue.equals(""))
-					x = turn;
-				else
-					x = turnValue;
-			}
+		// Check the column
+		// TODO: Clean up this approach
+		if (rowIndex%3 == 0) {
+			value = winChecker[rowIndex][columnIndex];
+			value1 = winChecker[rowIndex+1][columnIndex];
+			value2 = winChecker[rowIndex+2][columnIndex];
+		} else if (rowIndex%3 == 1) {
+			value = winChecker[rowIndex-1][columnIndex];
+			value1 = winChecker[rowIndex][columnIndex];
+			value2 = winChecker[rowIndex+1][columnIndex];
+		} else if (rowIndex%3 == 2) {
+			value = winChecker[rowIndex-2][columnIndex];
+			value1 = winChecker[rowIndex-1][columnIndex];
+			value2 = winChecker[rowIndex][columnIndex];
 		}
-		if(f%3==2&&g%3==0){
-			value = winchecker[f][g];
-			value1 = winchecker[f-1][g+1];
-			value2 = winchecker[f-2][g+2];}
-		else{
-			if(f%3==1&&g%3==1){
-				value = winchecker[f+1][g-1];
-				value1 = winchecker[f][g];
-				value2 = winchecker[f-1][g+1];
-			}			
-			else{
-				if(f%3==0&&g%3==2){
-					value = winchecker[f+2][g-2];
-					value1 = winchecker[f+1][g-1];
-					value2 = winchecker[f][g];
-				}
-			}
+
+		// Seeing if all the cells in the row have the same value
+		if(value != null && value1 != null && value2 != null && value.equals(value1) && value1.equals(value2)) {
+			x = turnValue.equals("") ? turn : turnValue;
 		}
-			
-		if(value != null && value1 != null && value2 != null){
-			if(value.equals(value1) && value1.equals(value2)){
-				if(turnValue.equals(""))
-					x = turn;
-				else
-					x = turnValue;
-			}
+
+		// Check the row
+		// TODO: Clean up this approach
+		if (columnIndex%3 == 0) {
+			value = winChecker[rowIndex][columnIndex];
+			value1 = winChecker[rowIndex][columnIndex+1];
+			value2 = winChecker[rowIndex][columnIndex+2];
+		} else if (columnIndex%3 == 1) {
+			value = winChecker[rowIndex][columnIndex-1];
+			value1 = winChecker[rowIndex][columnIndex];
+			value2 = winChecker[rowIndex][columnIndex+1];
+		} else if (columnIndex%3 == 2) {
+			value = winChecker[rowIndex][columnIndex-2];
+			value1 = winChecker[rowIndex][columnIndex-1];
+			value2 = winChecker[rowIndex][columnIndex];
 		}
-		String playerwin = "";
-		if(x.equals("X")){
-			playerwin = game.player1.playerName;
-			winningletter.setText("X");
+
+		// Seeing if all the cells in the column have the same value
+		if (value != null && value1 != null && value2 != null && value.equals(value1) && value1.equals(value2)) {
+			x = turnValue.equals("") ? turn : turnValue;
 		}
-		if (x.equals("O")){
-			playerwin = game.player2.playerName;
-			winningletter.setText("O");
+
+		// Check the top-left to bottom-right diagonal
+		// TODO: Clean up this approach
+		if (rowIndex%3 == 0 && columnIndex%3 == 0) {
+			value = winChecker[rowIndex][columnIndex];
+			value1 = winChecker[rowIndex+1][columnIndex+1];
+			value2 = winChecker[rowIndex+2][columnIndex+2];
+		} else if (rowIndex%3 == 1 && columnIndex%3 == 1) {
+			value = winChecker[rowIndex-1][columnIndex-1];
+			value1 = winChecker[rowIndex][columnIndex];
+			value2 = winChecker[rowIndex+1][columnIndex+1];
+		} else if (rowIndex%3 == 2 && columnIndex%3 == 2) {
+			value = winChecker[rowIndex-2][columnIndex-2];
+			value1 = winChecker[rowIndex-1][columnIndex-1];
+			value2 = winChecker[rowIndex][columnIndex];
 		}
-		
-//		Log.d("x", x);
-//		Log.d("n", "" + n);
-//		Log.d("actual", "" + actual);
-		
-		if(x.equals("O") || x.equals("X")){
-//			Toast winToast = Toast.makeText(context, playerwin+" wins!", Toast.LENGTH_SHORT);
-//			board = new Board();
-			switch(n){
+
+		// Seeing if all the cells in the diagonal have the same value
+		if (value != null && value1 != null && value2 != null && value.equals(value1) && value1.equals(value2)) {
+			x = turnValue.equals("") ? turn : turnValue;
+		}
+
+		// Check the top-right to bottom-left diagonal
+		// TODO: Clean up this approach
+		if (rowIndex%3 == 2 && columnIndex%3 == 0) {
+			value = winChecker[rowIndex][columnIndex];
+			value1 = winChecker[rowIndex-1][columnIndex+1];
+			value2 = winChecker[rowIndex-2][columnIndex+2];
+		} else if (rowIndex%3 == 1 && columnIndex%3 == 1) {
+			value = winChecker[rowIndex+1][columnIndex-1];
+			value1 = winChecker[rowIndex][columnIndex];
+			value2 = winChecker[rowIndex-1][columnIndex+1];
+		} else if (rowIndex%3 == 0 && columnIndex%3 == 2) {
+			value = winChecker[rowIndex+2][columnIndex-2];
+			value1 = winChecker[rowIndex+1][columnIndex-1];
+			value2 = winChecker[rowIndex][columnIndex];
+		}
+
+		// Seeing if all the cells in the diagonal have the same value
+		if (value != null && value1 != null && value2 != null && value.equals(value1) && value1.equals(value2)) {
+			x = turnValue.equals("") ? turn : turnValue;
+		}
+
+		// Setting the winning player name and winning letter
+		// TODO: Make this not based on the letter being played (if possible)
+		String winningPlayerName = "";
+		if (x.equals("X")) {
+			winningPlayerName = game.player1.playerName;
+			winningLetter.setText("X");
+		}
+		if (x.equals("O")) {
+			winningPlayerName = game.player2.playerName;
+			winningLetter.setText("O");
+		}
+
+		// Change board as necessary based off if a winner was found
+		if (x.equals("O") || x.equals("X")) {
+			switch(testLevel){
 			case 1:
-//				Log.d("Winning Board Changer", "Called");
-//				board.WinningBoardChanger(f, g, n, actual, winToast, winningletter, x, context, wincheck);
 				if(!Board.multiplayer) {
-//					Log.d("winchecker", "finishGame");
-//					finishGame(false);
-//				}
-//				else {
-					board.finishActivity(context, true, playerwin);
+					board.finishActivity(context, true, winningPlayerName);
 				}
                 Board.winOrTie = true;
 				winOrTie =  true;
 				break;
 			case 2:
-				if(actual == 2){
-					Log.d("Change", x + " " + actual);
-					board.WinningBoardChanger(f, g, n, actual, x, context, wincheck);
+				if(actualLevel == 2){
+					Log.d("Change", x + " " + actualLevel);
+					board.winningBoardChanger(rowIndex, columnIndex, testLevel, actualLevel, x, context, winCheck);
 				}
-//				if(actual == 3){
-//					board.WinningBoardChanger(q, r, n, actual, x, context, wincheck);
-//				}
-//				if(actual == 4){
-//					board.WinningBoardChanger(q, r, n, actual, x, context, wincheck);
-//				}
 				break;
-//			case 3:
-//				if(actual == 3){
-//					board.WinningBoardChanger(f, g, n, actual, x, context, wincheck);
-//				}
-//				if(actual == 4){
-//					board.WinningBoardChanger(q, r, n, actual, x, context, wincheck);
-//				}
-//				break;
-//			case 4:
-//				if(actual == 4){
-//					board.WinningBoardChanger(f, g, n, actual, x, context, wincheck);
-//				}
 			}
 		}
-		
+
+		// Check for ties as well
 		String tieCheckerString = "";
-		switch(Board.level) {
+		switch (Board.level) {
 		case 1:
 			tieCheckerString = "Inner";
 			break;
 		case 2:
 			tieCheckerString = "Outer";
 			break;
-		case 3:
-			tieCheckerString = "MetaOuter";
-			break;
-		case 4:
-			tieCheckerString = "MetaMetaOuter";
-			break;
 		}
-		
-		Log.d("CT", "Checking Tie" + Board.level + x);
-		if(!winOrTie && (!x.equals("X") && !x.equals("O")) && tieChecker(tieCheckerString, n, f, g)) {
+
+		// Handle it in case a tie is found
+		if (!winOrTie && (!x.equals("X") && !x.equals("O")) && tieChecker(tieCheckerString, testLevel, rowIndex, columnIndex)) {
 			if(Board.multiplayer) {
-				Log.d("tieChecker", "finishGame");
 				finishGame(true);
 			} else {
 				board.finishActivity(context, true, "Tie");
@@ -524,6 +479,7 @@ public class ButtonPressed implements OnClickListener {
 	}
 
 	public void finishGame(boolean tie) {
+		// TODO: See if this AsyncTask is required, and if yes, perhaps create a class to handle these
 		AsyncTask<Boolean, Void, String> finishGameTask = new AsyncTask<Boolean, Void, String>() {
 
 			@Override
@@ -552,7 +508,6 @@ public class ButtonPressed implements OnClickListener {
 				outAnimation.setDuration(200);
 				Board.progressBarHolder.setAnimation(outAnimation);
 				Board.progressBarHolder.setVisibility(View.GONE);
-				Log.d("Won", "" + true);
 				board.finishActivity(context, true, result);
 				currentTurn = "";
 			}
@@ -562,6 +517,9 @@ public class ButtonPressed implements OnClickListener {
 		finishGameTask.execute(tie);
 	}
 
+	/*
+	 * Makes the turn for a Facebook game, creating a game request from the provided parameters
+	 */
 	private void makeTurn(long to, Map<String, String> params) {
 		GameRequestContent.Builder requestContent = new GameRequestContent.Builder();
 		requestContent.setRecipients(Arrays.asList("" + to));
@@ -573,10 +531,14 @@ public class ButtonPressed implements OnClickListener {
 		Board.requestDialog.show(requestContent.build());
 	}
 
-	public static byte[] wincheckerToByteArray(String[][] winchecker) {
+	/*
+	 * Creates a string first and then turns the game into a byte array
+	 */
+	// TODO: Clean up the naming!
+	public static byte[] winCheckerToByteArray(String[][] winChecker) {
 		StringBuilder gameString = new StringBuilder();
-        for (String[] aWinchecker : winchecker) {
-            for (int j = 0; j < winchecker[0].length; j++) {
+        for (String[] aWinchecker : winChecker) {
+            for (int j = 0; j < winChecker[0].length; j++) {
                 gameString.append(aWinchecker[j]).append(",");
             }
             gameString.append(";");

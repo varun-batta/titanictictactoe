@@ -27,6 +27,7 @@ import com.google.android.gms.plus.Plus;
 
 import java.io.IOException;
 
+// TODO: Is this deprecated?
 public class PlayGame extends Activity implements ConnectionCallbacks, OnConnectionFailedListener {
 	
 	public static GoogleApiClient client;

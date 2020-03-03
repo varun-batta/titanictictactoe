@@ -14,6 +14,7 @@ import com.facebook.AccessToken;
 import java.util.Hashtable;
 
 public class Winner extends Activity { //} implements ResultCallback<InitiateMatchResult> {
+	// TODO: Clean up the code in this class and refactor as necessary
 
 	Context context;
 	boolean multiplayer;
@@ -164,9 +165,9 @@ public class Winner extends Activity { //} implements ResultCallback<InitiateMat
 //		ButtonPressed.currentTurn = "";
 		switch(buttonText) {
 		case "Main Menu":
-			ButtonPressed.wincheck = new String [10][9];
-			ButtonPressed.metawincheck = new String [3][3];
-			Board.wincheck = new String [10][9];
+			ButtonPressed.winCheck = new String [10][9];
+			ButtonPressed.metaWinCheck = new String [3][3];
+			Board.winCheck = new String [10][9];
 			Intent mainMenu = new Intent(context, MainMenu.class);
 			startActivity(mainMenu);
 			this.finish();
@@ -185,9 +186,9 @@ public class Winner extends Activity { //} implements ResultCallback<InitiateMat
 			this.finish();
 			break;
 //		case "New WiFi Game":
-//			ButtonPressed.wincheck = new String [10][9];
-//			ButtonPressed.metawincheck = new String [3][3];
-//			Board.wincheck = new String [10][9];
+//			ButtonPressed.winCheck = new String [10][9];
+//			ButtonPressed.metaWinCheck = new String [3][3];
+//			Board.winCheck = new String [10][9];
 //			Intent wifiGameIntent = new Intent(context, LevelMenu.class);
 //			wifiGameIntent.putExtra("Multiplayer", true);
 //			wifiGameIntent.putExtra("Caller", "Winner");
@@ -196,9 +197,9 @@ public class Winner extends Activity { //} implements ResultCallback<InitiateMat
 //			this.finish();
 //			break;
 //		case "New Game":
-//			ButtonPressed.wincheck = new String [10][9];
-//			ButtonPressed.metawincheck = new String [3][3];
-//			Board.wincheck = new String [10][9];
+//			ButtonPressed.winCheck = new String [10][9];
+//			ButtonPressed.metaWinCheck = new String [3][3];
+//			Board.winCheck = new String [10][9];
 //			Intent playGameIntent = new Intent(context, LevelMenu.class);
 //			playGameIntent.putExtra("Multiplayer", false);
 //            playGameIntent.putExtra("Caller", "Winner");

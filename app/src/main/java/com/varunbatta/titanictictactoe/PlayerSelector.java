@@ -1,6 +1,5 @@
 package com.varunbatta.titanictictactoe;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -21,17 +20,9 @@ public class PlayerSelector extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Context context = getApplicationContext();
-//        requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.player_selector);
 
         level = getIntent().getIntExtra("Level", 1);
-
-//        WindowManager.LayoutParams params = getWindow().getAttributes();
-//        params.height = 1200;
-//        params.width = getWindow().getAttributes().width;
-//
-//        this.getWindow().setAttributes(params);
 
         viewGroup = findViewById(R.id.playerSelectorLayout);
 
@@ -84,6 +75,5 @@ public class PlayerSelector extends AppCompatActivity {
         board.putExtra("Finished", false);
         board.putExtra("Multiplayer", false);
         startActivity(board);
-//        this.finish();
     }
 }

@@ -14,6 +14,7 @@ import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
 import android.widget.Toast;
 
+// TODO: Is this deprecated?
 public class PlayerNames extends Activity {
 
 	LinearLayout playerNamesLayout;

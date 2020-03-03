@@ -45,7 +45,8 @@ import java.util.TimerTask;
 
 public class Board extends Activity implements ConnectionCallbacks, OnConnectionFailedListener {
 
-    static Game game;
+    // TODO: See how many of these variables are required
+	static Game game = null;
 	TextView playerTurn;
 	long requestID;
 	static String turn;
@@ -53,9 +54,9 @@ public class Board extends Activity implements ConnectionCallbacks, OnConnection
     static int level;
 	int row;
 	int column;
-	public static Hashtable<Integer, Button> keys = new Hashtable<Integer, Button>(81);
+	public static Hashtable<Integer, Button> keys = new Hashtable<>(81);
 	byte [] onGoingMatch = null;
-	static String [][] wincheck = new String [10][9];
+	static String [][] winCheck = new String [10][9];
     ButtonPressed bp;
 	Context context;
 	LinearLayout bottomPanel;
@@ -100,7 +101,6 @@ public class Board extends Activity implements ConnectionCallbacks, OnConnection
         onCreateCalled = true;
 		boardVisible = true;
 		setContentView(R.layout.board);
-		BoardAdapter.numberOfTimesPositionIsZero = 0;
 		context = getApplicationContext();
 		sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
 		level = getIntent().getIntExtra("Level", 0);
@@ -120,14 +120,13 @@ public class Board extends Activity implements ConnectionCallbacks, OnConnection
             } else if (caller.equals("Current Games")) {
 		        game = CurrentGames.currentGames.get(requestID);
             }
-        } else {
-		    game = null;
         }
 
         if (game == null) {
 		    game = new Game();
 		    game.level = level;
 
+		    // TODO: See if there's a better way to populate this data
 		    Player player1 = new Player();
 		    player1.playerName = getIntent().getStringExtra("Player 1 Name");
 		    player1.playerFBID = getIntent().getLongExtra("Player 1 FBID", 0);
@@ -141,8 +140,10 @@ public class Board extends Activity implements ConnectionCallbacks, OnConnection
         }
 
 		bp = new ButtonPressed(context, level, game, this);
-		boardActivity = this;
+		// TODO: See if this is required
+        boardActivity = this;
 
+        // TODO: Initialize this as required, if necessary
 		client = new GoogleApiClient.Builder(this)
             .addApi(Plus.API)
             .addScope(Plus.SCOPE_PLUS_LOGIN)
@@ -157,15 +158,18 @@ public class Board extends Activity implements ConnectionCallbacks, OnConnection
 		
 		progressBarHolder = findViewById(R.id.progressBarHolder);
 		boardLayout = findViewById(R.id.boardLayout);
+
+		// TODO: Why does this have to be done here?
 		TextView levelTitle = findViewById(R.id.levelTitle);
 		levelTitle.setTextColor(Color.BLACK);
 		levelTitle.setGravity(Gravity.CENTER);
 		levelTitle.setTextSize(30);
 
+		// TODO: Clean up this code so that it makes more sense!!
         if (onGoingMatch != null) {
             savedGameRecreate(onGoingMatch);
             game = new Game();
-            game.data = wincheck;
+            game.data = winCheck;
             game.level = level;
 
             Player player1 = new Player();
@@ -187,19 +191,21 @@ public class Board extends Activity implements ConnectionCallbacks, OnConnection
         board.init(width, level);
         board.metaRow = 0;
         board.metaColumn = 0;
-        BasicBoardView.wincheck = game.data;
+        BasicBoardView.winCheck = game.data;
 		board.configureBoard(width, level, level, this);
 
 		for (Button button : Board.keys.values()) {
 		    button.setEnabled(true);
         }
 
-        if (game.data[9][2] != null && !game.data[9][2].equals("") && level >= 2) {
+        // TODO: Clean this up!!
+		if (game.data[9][2] != null && !game.data[9][2].equals("") && level >= 2) {
             int row = Integer.parseInt(game.data[9][0]);
             int column = Integer.parseInt(game.data[9][1]);
             bp.boardChanger(row, column, level, true);
         }
 
+		// TODO: All this setup should go in a different function if necessary
 		switch(level) {
 		case 1:
 			levelTitle.setText("Tic");
@@ -219,12 +225,14 @@ public class Board extends Activity implements ConnectionCallbacks, OnConnection
 			levelTitle.setText("T4");
 //			levelTitle.setBackgroundColor(Color.CYAN);
 		}
-		
+
+		// TODO: Clean up this view and logic
         bottomPanel = findViewById(R.id.bottom_panel);
 		playerTurn = findViewById(R.id.player_turn);
 		playerTurn.setTextColor(Color.BLACK);
 		playerTurn.setText(game.player1.playerName + "'s Turn");
 
+		// TODO: Once again, this setup might be better placed elsewhere
         if (multiplayer) {
             FacebookSdk.sdkInitialize(this.getApplicationContext());
             callbackManager = CallbackManager.Factory.create();
@@ -232,9 +240,11 @@ public class Board extends Activity implements ConnectionCallbacks, OnConnection
             requestDialog.registerCallback(callbackManager,
                     new FacebookCallback<GameRequestDialog.Result>() {
                         public void onSuccess(GameRequestDialog.Result result) {
-                            GameRequest deleteRequest = new GameRequest();
+                            // Game Request for making a move
+                        	GameRequest deleteRequest = new GameRequest();
                             deleteRequest.createNewGameRequest("/" + game.requestID, null, HttpMethod.DELETE);
                             new GraphRequests().execute(deleteRequest);
+                            // TODO: Clean up this logic a bit if necessary
                             if (Board.winOrTie) {
                                 String winnerName = turn.equals("X") ? game.player1.playerName : game.player2.playerName;
                                 finishActivity(context, true, winnerName);
@@ -252,38 +262,32 @@ public class Board extends Activity implements ConnectionCallbacks, OnConnection
     @Override
 	protected void onResume() {
 		super.onResume();
-        if(boardLayout.findViewById(R.id.bottomPanel) == null) {
-            if(game.lastMove.contains("X")) {
-                playerTurn.setText(game.player1.playerName + "'s Turn");
-            } else if (game.lastMove.contains("O")) {
-                playerTurn.setText(game.player2.playerName + "'s Turn");
-            }
-        }
+		if (boardLayout.findViewById(R.id.bottomPanel) == null) {
+			// TODO: Might wanna take a look at this logic again
+			if (game.lastMove.contains("X")) {
+				// TODO: Fix text allocation with string formatting
+				playerTurn.setText(game.player1.playerName + "'s Turn");
+			} else if (game.lastMove.contains("O")) {
+				playerTurn.setText(game.player2.playerName + "'s Turn");
+			}
+		}
 	}
-	
-	@Override
-	protected void onPause() {
-		super.onPause();
-	}
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-    }
 	
 	@Override
 	public void onSaveInstanceState(Bundle instanceState) {
 		super.onSaveInstanceState(instanceState);
-		instanceState.putByteArray("On Going Match", ButtonPressed.wincheckerToByteArray(ButtonPressed.wincheck));
+		// TODO: See what this is for (the screen being closed?)
+		instanceState.putByteArray("On Going Match", ButtonPressed.winCheckerToByteArray(ButtonPressed.winCheck));
 
 		SharedPreferences.Editor editor = sharedPreferences.edit();
-		editor.putString("On Going Match", Base64.encodeToString(ButtonPressed.wincheckerToByteArray(ButtonPressed.wincheck), Base64.DEFAULT));
+		editor.putString("On Going Match", Base64.encodeToString(ButtonPressed.winCheckerToByteArray(ButtonPressed.winCheck), Base64.DEFAULT));
 		editor.commit();
 	}
 	
 	@Override
 	public void onRestoreInstanceState(Bundle instanceState) {
 		super.onRestoreInstanceState(instanceState);
+		// TODO: See what this is for (the screen being awakened?)
 		onGoingMatch = instanceState.getByteArray("On Going Match");
 	}
 
@@ -294,212 +298,186 @@ public class Board extends Activity implements ConnectionCallbacks, OnConnection
 		for(int l = 0; l < rows.length; l++) {
 			game[l] = rows[l].split(",");
 		}
-		wincheck = game;
+		winCheck = game;
 	}
 	
 	/*
 	 * Purpose: To check whether the latest move was a winning move
 	 * Input:
-	 *  f - row index
-	 *  g - column index
-	 *  n - testing level
-	 *  actual - actual level
-	 *  winchecker - array to check
+	 *  rowIndex - row index
+	 *  columnIndex - column index
+	 *  testingLevel - testing level
+	 *  actualLevel - actual level
+	 *  winChecker - array to check
 	 *  turnValue - value of latest turn X or O
 	 * Output: true if won, false otherwise
 	 */
-	public static boolean winChecker(int f, int g, int n, int actual, String[][] winchecker, String turnValue) {
-		//TODO: Refactor this function!
+	public static boolean winChecker(int rowIndex, int columnIndex, int testingLevel, int actualLevel, String[][] winChecker, String turnValue) {
+		//TODO: Refactor this function! (or deprecate)
 		String value = "";
 		String value1 = "";
 		String value2 = "";
-		String x = "";
-		int q = -1;
-		int r = -1;
-		int length = winchecker.length;
-		int width = winchecker[0].length;
-		
-		if(n==3&&actual==4){ 
-			q = f;
-			r = g;
-			f=f/3;
-			g=g/3;}
-		if(n==2&&actual>=3){
-			q=f;
-			r=g;
-			f=f/3;
-			g=g/3;}
-		if(n==1&&actual>=2){
-			q=f;
-			r=g;
-			f=f/3;
-			g=g/3;}
-		
-		if(f%3==0){
-			value = winchecker[f][g];
-			value1 = winchecker[f+1][g];
-			value2 = winchecker[f+2][g];
+		String winningTurnValue = "";
+
+		// TODO: Handle the edits on rowIndex, columnIndex based on the testingLevel and actualLevel values
+		if (testingLevel == 3 && actualLevel == 4) {
+			rowIndex /= 3;
+			columnIndex /= 3;
 		}
-		else{
-			if(f%3==1){
-				value = winchecker[f-1][g];
-				value1 = winchecker[f][g];
-				value2 = winchecker[f+1][g];
-				}
-			else{
-				if(f%3==2){
-					value = winchecker[f-2][g];
-					value1 = winchecker[f-1][g];
-					value2 = winchecker[f][g];
-				}
-			}
+		if (testingLevel == 2 && actualLevel >= 3) {
+			rowIndex /= 3;
+			columnIndex /= 3;
 		}
-		if(value == null||value1 == null||value2==null){
-		}
-		else{
-			if(value.equals(value1) && value1.equals(value2)){
-				x = turnValue;
-			}
-		}
-		
-		if(g%3==0){
-			value = winchecker[f][g];
-			value1 = winchecker[f][g+1];
-			value2 = winchecker[f][g+2];
-			}
-		else{
-			if(g%3==1){
-				value = winchecker[f][g-1];
-				value1 = winchecker[f][g];
-				value2 = winchecker[f][g+1];
-			}
-			else{
-				if(g%3==2){
-					value = winchecker[f][g-2];
-					value1 = winchecker[f][g-1];
-					value2 = winchecker[f][g];
-				}
-			}}
-		
-		
-		if(value == null||value1 == null||value2==null){}
-		else{
-			if(value.equals(value1) && value1.equals(value2)){
-				x = turnValue;
-			}
-		}
-		
-		if(f%3==0&&g%3==0){
-			value = winchecker[f][g];
-			value1 = winchecker[f+1][g+1];
-			value2 = winchecker[f+2][g+2];}
-		else{
-			if(f%3==1&&g%3==1){
-				value = winchecker[f-1][g-1];
-				value1 = winchecker[f][g];
-				value2 = winchecker[f+1][g+1];
-			}			
-			else{
-				if(f%3==2&&g%3==2){
-					value = winchecker[f-2][g-2];
-					value1 = winchecker[f-1][g-1];
-					value2 = winchecker[f][g];
-				}
-			}
+		if ( testingLevel == 1 && actualLevel >= 2 ) {
+			rowIndex /= 3;
+			columnIndex /= 3;
 		}
 
-		if(value == null||value1 == null||value2==null){}
-		else{
-			if(value.equals(value1) && value1.equals(value2)){
-				x = turnValue;
-			}
+		// Checking the columns
+		// TODO: Cleanup this approach
+		if (rowIndex%3 == 0) {
+			value = winChecker[rowIndex][columnIndex];
+			value1 = winChecker[rowIndex+1][columnIndex];
+			value2 = winChecker[rowIndex+2][columnIndex];
+		} else if (rowIndex%3 == 1) {
+			value = winChecker[rowIndex-1][columnIndex];
+			value1 = winChecker[rowIndex][columnIndex];
+			value2 = winChecker[rowIndex+1][columnIndex];
+		} else if (rowIndex%3 == 2) {
+			value = winChecker[rowIndex-2][columnIndex];
+			value1 = winChecker[rowIndex-1][columnIndex];
+			value2 = winChecker[rowIndex][columnIndex];
 		}
-		if(f%3==2&&g%3==0){
-			value = winchecker[f][g];
-			value1 = winchecker[f-1][g+1];
-			value2 = winchecker[f-2][g+2];}
-		else{
-			if(f%3==1&&g%3==1){
-				value = winchecker[f+1][g-1];
-				value1 = winchecker[f][g];
-				value2 = winchecker[f-1][g+1];
-			}			
-			else{
-				if(f%3==0&&g%3==2){
-					value = winchecker[f+2][g-2];
-					value1 = winchecker[f+1][g-1];
-					value2 = winchecker[f][g];
-				}
-			}
+
+		// Seeing if all cells in the column have the same value
+		if (!(value == null || value1 == null || value2 == null) && value.equals(value1) && value1.equals(value2)) {
+			winningTurnValue = turnValue;
 		}
-			
-		if(value == null||value1 == null||value2==null){}
-		else{
-			if(value.equals(value1) && value1.equals(value2)){
-				x=turnValue;
-			}
+
+		// Checking the rows
+		// TODO: Cleanup this approach
+		if (columnIndex%3 == 0) {
+			value = winChecker[rowIndex][columnIndex];
+			value1 = winChecker[rowIndex][columnIndex+1];
+			value2 = winChecker[rowIndex][columnIndex+2];
+		} else if (columnIndex%3 == 1) {
+			value = winChecker[rowIndex][columnIndex-1];
+			value1 = winChecker[rowIndex][columnIndex];
+			value2 = winChecker[rowIndex][columnIndex+1];
+		} else if (columnIndex%3 == 2) {
+			value = winChecker[rowIndex][columnIndex-2];
+			value1 = winChecker[rowIndex][columnIndex-1];
+			value2 = winChecker[rowIndex][columnIndex];
 		}
-		if(x.equals("X") || x.equals("O")) {
-			ButtonPressed.metawincheck[f/3][g/3] = x;
+
+		// Seeing if all cells in the row have the same value
+		if (!(value == null || value1 == null || value2 == null) && value.equals(value1) && value1.equals(value2)) {
+			winningTurnValue = turnValue;
+		}
+
+		// Checking the top-left to bottom-right diagonal
+		// TODO: Cleanup this approach
+		if (rowIndex%3 == 0 && columnIndex%3 == 0) {
+			value = winChecker[rowIndex][columnIndex];
+			value1 = winChecker[rowIndex+1][columnIndex+1];
+			value2 = winChecker[rowIndex+2][columnIndex+2];
+		} else if (rowIndex%3 == 1 && columnIndex%3 == 1) {
+			value = winChecker[rowIndex-1][columnIndex-1];
+			value1 = winChecker[rowIndex][columnIndex];
+			value2 = winChecker[rowIndex+1][columnIndex+1];
+		} else if (rowIndex%3 == 2 && columnIndex%3 == 2) {
+			value = winChecker[rowIndex-2][columnIndex-2];
+			value1 = winChecker[rowIndex-1][columnIndex-1];
+			value2 = winChecker[rowIndex][columnIndex];
+		}
+
+		// Seeing if all cells in the diagonal have the same value
+		if (!(value == null || value1 == null || value2 == null) && value.equals(value1) && value1.equals(value2)) {
+			winningTurnValue = turnValue;
+		}
+
+		// Checking the top-right to bottom-left diagonal
+		// TODO: Cleanup this approach
+		if (rowIndex%3 == 2 && columnIndex%3 == 0) {
+			value = winChecker[rowIndex][columnIndex];
+			value1 = winChecker[rowIndex-1][columnIndex+1];
+			value2 = winChecker[rowIndex-2][columnIndex+2];
+		} else if(rowIndex%3 == 1 && columnIndex%3 == 1) {
+			value = winChecker[rowIndex+1][columnIndex-1];
+			value1 = winChecker[rowIndex][columnIndex];
+			value2 = winChecker[rowIndex-1][columnIndex+1];
+		} else if(rowIndex%3 == 0 && columnIndex%3 == 2) {
+			value = winChecker[rowIndex+2][columnIndex-2];
+			value1 = winChecker[rowIndex+1][columnIndex-1];
+			value2 = winChecker[rowIndex][columnIndex];
+		}
+
+		// Seeing if all the cells in the diagonal have the same value
+		if (!(value == null || value1 == null || value2 == null) && value.equals(value1) && value1.equals(value2)) {
+			winningTurnValue = turnValue;
+		}
+
+		// If there is a valid winning value then put it in the metaWinCheck array
+		// TODO: See if this check is required
+		if (winningTurnValue.equals("X") || winningTurnValue.equals("O")) {
+			ButtonPressed.metaWinCheck[rowIndex/3][columnIndex/3] = winningTurnValue;
 			return true;
 		}
 		
 		return false;
 	}
 
-	public void WinningBoardChanger(final int f, final int g, final int level, int actual, final String x, Context game, String [][] wincheck) {
-		row = f;
-		column = g;
+	public void winningBoardChanger(final int rowIndex, final int columnIndex, final int level, int actual, final String x, Context game, String [][] winCheck) {
+		// TODO: Why are these global variables required?
+		row = rowIndex;
+		column = columnIndex;
 		bp = new ButtonPressed(game, level, this.game, boardActivity);
-		Board.wincheck = wincheck;
-		
-		switch (level){
-		case 1:
-			break;
-		case 2:
-			if(actual == 2){
-				ButtonPressed.metawincheck[f/3][g/3] = x;
-                BasicBoardView miniBoard = BasicBoardView.metaBoard[f/3][g/3];
-                miniBoard.findViewById(R.id.boardBackground).setAlpha(0);
-                miniBoard.findViewById(R.id.boardBackgroundRed).setAlpha(0);
-                miniBoard.findViewById(R.id.overlaying_linear_layout).setAlpha(0);
+		Board.winCheck = winCheck;
 
-                TextView won = new TextView(game);
-                won.setLayoutParams(miniBoard.getLayoutParams());
-                won.setText(x);
-                won.setTextSize(75);
-                won.setTextColor(Color.BLACK);
-                won.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
-                miniBoard.addView(won);
+		if(actual == 2){
+			// TODO: See if there's a better way to do this
+			ButtonPressed.metaWinCheck[rowIndex/3][columnIndex/3] = x;
+			BasicBoardView miniBoard = BasicBoardView.metaBoard[rowIndex/3][columnIndex/3];
+			miniBoard.findViewById(R.id.boardBackground).setAlpha(0);
+			miniBoard.findViewById(R.id.boardBackgroundRed).setAlpha(0);
+			miniBoard.findViewById(R.id.overlaying_linear_layout).setAlpha(0);
 
-				new Timer().schedule(new TimerTask() {
-					@Override
-					public void run() {
-				        // If you want to operate UI modifications, you must run ui stuff on UiThread.
-				        Board.this.runOnUiThread(new Runnable() {
-				            @Override
-				        	public void run() {
-								if (!Index.facebookGame) {
-									if (Index.receiving || NotificationService.receiving) {
-										bp.boardChanger(row, column, 2, true);
-									} else {
-										bp.boardChanger(row, column, 2, !multiplayer);
-									}
+			TextView won = new TextView(game);
+			won.setLayoutParams(miniBoard.getLayoutParams());
+			won.setText(x);
+			won.setTextSize(75);
+			won.setTextColor(Color.BLACK);
+			won.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+			miniBoard.addView(won);
+
+			// Create a timed UI event to handle the reload (as necessary)
+			new Timer().schedule(new TimerTask() {
+				@Override
+				public void run() {
+					// If you want to operate UI modifications, you must run ui stuff on UiThread.
+					Board.this.runOnUiThread(new Runnable() {
+						@Override
+						public void run() {
+							if (!Index.facebookGame) {
+								if (Index.receiving || NotificationService.receiving) {
+									bp.boardChanger(row, column, 2, true);
+								} else {
+									bp.boardChanger(row, column, 2, !multiplayer);
 								}
-								if ( bp.tieChecker("Outer", level, row, column) ) {
-									if ( multiplayer ) {
-										Log.d("tieChecker", "finishGame");
-										bp.finishGame(true);
-									} else {
-										finishActivity(context, true, "Tie");
-									}
+							}
+							if ( bp.tieChecker("Outer", level, row, column) ) {
+								if ( multiplayer ) {
+									Log.d("tieChecker", "finishGame");
+									bp.finishGame(true);
+								} else {
+									finishActivity(context, true, "Tie");
 								}
-				            }
-				        });
-                        Board.winOrTie = bp.winChecker(f, g, 1, 2, ButtonPressed.metawincheck, x);
-					}
-				}, 500);
-			}
+							}
+						}
+					});
+					Board.winOrTie = bp.winChecker(rowIndex, columnIndex, 1, 2, ButtonPressed.metaWinCheck, x);
+				}
+			}, 500);
 		}
 	}
 	
@@ -507,7 +485,9 @@ public class Board extends Activity implements ConnectionCallbacks, OnConnection
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.clear();
         editor.commit();
-		if(won){
+
+        // TODO: Clean this up as necessary
+        if (won) {
 		    winOrTie = false;
 			Intent winner = new Intent(context, Winner.class);
 			winner.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -515,9 +495,8 @@ public class Board extends Activity implements ConnectionCallbacks, OnConnection
 			winner.putExtra("Winner", winnerName);
 			winner.putExtra("Request ID", requestID);
 			context.startActivity(winner);
-			this.finish();
 		} else {
-			keys = new Hashtable<Integer, Button>(6561);
+			keys = new Hashtable<>(6561);
 			bottomPanel.removeAllViews();
 			boardLayout.removeAllViews();
 			Intent menu = new Intent(context, LevelMenu.class);
@@ -528,25 +507,28 @@ public class Board extends Activity implements ConnectionCallbacks, OnConnection
 			menu.putExtra("Caller", "Board");
 			menu.putExtra("Instructions", false);
 			context.startActivity(menu);
-			this.finish();
 		}
+
+		this.finish();
 	}
 	
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		// Overridden to handle the back keystroke in Android
 		if(keyCode == KeyEvent.KEYCODE_BACK) {
-			keys = new Hashtable<Integer, Button>(6561);
+			keys = new Hashtable<>(6561);
 			bottomPanel.removeAllViews();
 			boardLayout.removeAllViews();
-			ButtonPressed.wincheck = new String [10][9];
-			ButtonPressed.metawincheck = new String [3][3];
-			Board.wincheck = new String [10][9];
+			ButtonPressed.winCheck = new String [10][9];
+			ButtonPressed.metaWinCheck = new String [3][3];
+			Board.winCheck = new String [10][9];
 			ButtonPressed.currentTurn = "";
 			this.finish();
 		}
 		return super.onKeyDown(keyCode, event);
 	}
 
+	// TODO: Deprecate after redesign (if necessary)
 	public void bottomPanelListener(Context context, String pressedButtonText) {
 		this.finish();
 		SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -557,9 +539,9 @@ public class Board extends Activity implements ConnectionCallbacks, OnConnection
 			keys = new Hashtable<Integer, Button>(6561);
 			bottomPanel.removeAllViews();
 			boardLayout.removeAllViews();
-			ButtonPressed.wincheck = new String [10][9];
-			ButtonPressed.metawincheck = new String [3][3];
-			Board.wincheck = new String [10][9];
+			ButtonPressed.winCheck = new String [10][9];
+			ButtonPressed.metaWinCheck = new String [3][3];
+			Board.winCheck = new String [10][9];
 			ButtonPressed.currentTurn = "";
 			Intent menu = new Intent(context, LevelMenu.class);
 			menu.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -574,9 +556,9 @@ public class Board extends Activity implements ConnectionCallbacks, OnConnection
 			keys = new Hashtable<Integer, Button>(6561);
 			bottomPanel.removeAllViews();
 			boardLayout.removeAllViews();
-			ButtonPressed.wincheck = new String [10][9];
-			ButtonPressed.metawincheck = new String [3][3];
-			Board.wincheck = new String [10][9];
+			ButtonPressed.winCheck = new String [10][9];
+			ButtonPressed.metaWinCheck = new String [3][3];
+			Board.winCheck = new String [10][9];
 			ButtonPressed.currentTurn = "";
 			Intent mainMenu = new Intent(context, MainMenu.class);
 			mainMenu.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -586,9 +568,9 @@ public class Board extends Activity implements ConnectionCallbacks, OnConnection
 			keys = new Hashtable<Integer, Button>(6561);
 			bottomPanel.removeAllViews();
 			boardLayout.removeAllViews();
-			ButtonPressed.wincheck = new String [10][9];
-			ButtonPressed.metawincheck = new String [3][3];
-			Board.wincheck = new String [10][9];
+			ButtonPressed.winCheck = new String [10][9];
+			ButtonPressed.metaWinCheck = new String [3][3];
+			Board.winCheck = new String [10][9];
 			ButtonPressed.currentTurn = "";
 			Intent newGame = new Intent(context, PlayerNames.class);
 			newGame.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -598,9 +580,9 @@ public class Board extends Activity implements ConnectionCallbacks, OnConnection
 			keys = new Hashtable<Integer, Button>(6561);
 			bottomPanel.removeAllViews();
 			boardLayout.removeAllViews();
-			ButtonPressed.wincheck = new String [10][9];
-			ButtonPressed.metawincheck = new String [3][3];
-			Board.wincheck = new String [10][9];
+			ButtonPressed.winCheck = new String [10][9];
+			ButtonPressed.metaWinCheck = new String [3][3];
+			Board.winCheck = new String [10][9];
 			ButtonPressed.currentTurn = "";
 			Intent newWifiGame = new Intent(context, LevelMenu.class);
 			newWifiGame.putExtra("Multiplayer", true);
@@ -612,6 +594,7 @@ public class Board extends Activity implements ConnectionCallbacks, OnConnection
 		}
 	}
 
+	// TODO: Deprecate this if not necessary, else try to clean this networking stuff up
 	@Override
 	public void onConnectionFailed(ConnectionResult result) {
 		if (resolvingError) {
@@ -627,7 +610,6 @@ public class Board extends Activity implements ConnectionCallbacks, OnConnection
             }
         } else {
             // Show dialog using GooglePlayServicesUtil.getErrorDialog()
-//            showErrorDialog(result.getErrorCode());
             resolvingError = true;
         }
 	}
@@ -695,6 +677,7 @@ public class Board extends Activity implements ConnectionCallbacks, OnConnection
         final String snapshotNm = snapshotMetadata.getUniqueName();
 		//TODO: Use name to load snapshot
 
+		// TODO: Eliminiate this AsyncTask if not necessary
 		AsyncTask<Void, Void, Boolean> task = new AsyncTask<Void, Void, Boolean>() {
         	@Override
             protected void onPreExecute() {
@@ -724,20 +707,4 @@ public class Board extends Activity implements ConnectionCallbacks, OnConnection
 
         task.execute();
 	}
-	
-	private byte[] wincheckerToByteArray(String[][] winchecker) {
-		String gameString = "";
-		for(int i = 0; i < winchecker.length; i++) {
-			for(int j = 0; j < winchecker[0].length; j++) {
-				gameString = gameString + winchecker[i][j] + ",";
-			}
-			gameString = gameString + ";";
-		}
-		return gameString.getBytes();
-	}
-
-    @Override
-    public void onPointerCaptureChanged(boolean hasCapture) {
-
-    }
 }

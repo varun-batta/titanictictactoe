@@ -33,15 +33,13 @@ import com.google.android.gms.plus.Plus;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
-//import com.google.android.gms.games.internal.constants.TurnBasedMatchStatus;
-
 /**
  * @author Varun
- *
+ * TODO: Document what this class does
  */
 public class NotificationService extends Service implements OnTurnBasedMatchUpdateReceivedListener, ConnectionCallbacks, 
 OnConnectionFailedListener {
-	
+	// TODO: See if this is still necessary and if there is anyway to handle it with Facebook
 	public static NotificationManager notificationManager;
     private static PowerManager powerManager;
 	Board board;
@@ -148,22 +146,22 @@ OnConnectionFailedListener {
             byte[] game = match.getData();
             board.savedGameRecreate(game);//, context);
 
-            int level = Integer.parseInt(Board.wincheck[Board.wincheck.length - 1][5]);
-            int row = Integer.parseInt(Board.wincheck[Board.wincheck.length - 1][0]);
-            int column = Integer.parseInt(Board.wincheck[Board.wincheck.length - 1][1]);
+            int level = Integer.parseInt(Board.winCheck[Board.winCheck.length - 1][5]);
+            int row = Integer.parseInt(Board.winCheck[Board.winCheck.length - 1][0]);
+            int column = Integer.parseInt(Board.winCheck[Board.winCheck.length - 1][1]);
             int multiplier = (int) Math.pow(3, (double) level);
             int key = row * multiplier + column;
 
             String turn = "";
 
-            ButtonPressed.currentTurn = Board.wincheck[Board.wincheck.length - 1][4];
+            ButtonPressed.currentTurn = Board.winCheck[Board.winCheck.length - 1][4];
             TextView playerTurn = board.findViewById(R.id.player_turn);
-            if (Board.wincheck[Board.wincheck.length - 1][4].equals("X")) {
+            if (Board.winCheck[Board.winCheck.length - 1][4].equals("X")) {
                 turn = "O";
-                playerTurn.setText(Board.wincheck[Board.wincheck.length - 1][2] + "'s Turn");
+                playerTurn.setText(Board.winCheck[Board.winCheck.length - 1][2] + "'s Turn");
             } else {
                 turn = "X";
-                playerTurn.setText(Board.wincheck[Board.wincheck.length - 1][3] + "'s Turn");
+                playerTurn.setText(Board.winCheck[Board.winCheck.length - 1][3] + "'s Turn");
             }
 
             Button opponentMove = Board.keys.get(key);
@@ -176,11 +174,11 @@ OnConnectionFailedListener {
                 bp.boardChanger(row, column, level, true);
             }
 
-            if (!bp.winChecker(row, column, level, level, Board.wincheck, turn) && ButtonPressed.metawincheck[row / 3][column / 3] == null) {
+            if (!bp.winChecker(row, column, level, level, Board.winCheck, turn) && ButtonPressed.metaWinCheck[row / 3][column / 3] == null) {
                 for (int i = 0; i < multiplier; i++) {
                     for (int j = 0; j < multiplier; j++) {
                         int buttonKey = i * multiplier + j;
-                        String metaValue = ButtonPressed.metawincheck[i / 3][j / 3];
+                        String metaValue = ButtonPressed.metaWinCheck[i / 3][j / 3];
                         if (metaValue == null) {
                             Log.d("buttonKey", "" + buttonKey);
                             Button button = Board.keys.get(buttonKey);
@@ -255,22 +253,22 @@ OnConnectionFailedListener {
                 //			showNotification(turnIntent, context, "Your Turn", opponentName + " has made a move");
                 //			Board.savedGameRecreate(game, context);
                 //
-                //			int level = Integer.parseInt(Board.wincheck[Board.wincheck.length - 1][5]);
-                //			int row = Integer.parseInt(Board.wincheck[Board.wincheck.length - 1][0]);
-                //			int column = Integer.parseInt(Board.wincheck[Board.wincheck.length - 1][1]);
+                //			int level = Integer.parseInt(Board.winCheck[Board.winCheck.length - 1][5]);
+                //			int row = Integer.parseInt(Board.winCheck[Board.winCheck.length - 1][0]);
+                //			int column = Integer.parseInt(Board.winCheck[Board.winCheck.length - 1][1]);
                 //			int multiplier = (int) Math.pow(3, (double) level);
                 //			int key = row * multiplier + column;
                 //
                 //			String turn = "";
                 //
-                ButtonPressed.currentTurn = Board.wincheck[Board.wincheck.length - 1][4];
+                ButtonPressed.currentTurn = Board.winCheck[Board.winCheck.length - 1][4];
                 //
-                //			if(Board.wincheck[Board.wincheck.length - 1][4].equals("X")) {
+                //			if(Board.winCheck[Board.winCheck.length - 1][4].equals("X")) {
                 //				turn = "O";
-                //				ButtonPressed.playerturn.setText(Board.wincheck[Board.wincheck.length - 1][2] + "'s Turn");
+                //				ButtonPressed.playerTurn.setText(Board.winCheck[Board.winCheck.length - 1][2] + "'s Turn");
                 //			} else {
                 //				turn = "X";
-                //				ButtonPressed.playerturn.setText(Board.wincheck[Board.wincheck.length - 1][3] + "'s Turn");
+                //				ButtonPressed.playerTurn.setText(Board.winCheck[Board.winCheck.length - 1][3] + "'s Turn");
                 //			}
                 //
                 //			Button opponentMove = Board.keys.get(key);
@@ -283,11 +281,11 @@ OnConnectionFailedListener {
                 //				bp.boardChanger(row, column, level, true);
                 //			}
                 //
-                //			if ( !bp.winChecker(row, column, level, level, Board.wincheck, turn) && ButtonPressed.metawincheck[row/3][column/3] == null) {
+                //			if ( !bp.winChecker(row, column, level, level, Board.winCheck, turn) && ButtonPressed.metaWinCheck[row/3][column/3] == null) {
                 //				for ( int i = 0; i < multiplier; i++ ) {
                 //					for ( int j = 0; j < multiplier; j++ ) {
                 //						int buttonKey = i * multiplier + j;
-                //						String metaValue = ButtonPressed.metawincheck[i/3][j/3];
+                //						String metaValue = ButtonPressed.metaWinCheck[i/3][j/3];
                 //						if(metaValue == null) {
                 //							Log.d("buttonKey", "" + buttonKey);
                 //							Button button = Board.keys.get(buttonKey);

@@ -22,6 +22,7 @@ import java.util.ArrayList;
 
 public class GraphRequests extends AsyncTask<GameRequest, Void, Object> {
 
+    // TODO: Use a better networking tool like OKHTTP to do this
     AccessToken accessToken = AccessToken.getCurrentAccessToken();
     GraphRequest request;
     String path;
@@ -61,15 +62,17 @@ public class GraphRequests extends AsyncTask<GameRequest, Void, Object> {
             request.executeAndWait();
             return me;
         } else if(path.contains("/friends")) {
-            final ArrayList<Long> friendsFBIDs = new ArrayList<Long>();
+            final ArrayList<Player> friends = new ArrayList<>();
             request = GraphRequest.newMyFriendsRequest(accessToken,
                     new GraphRequest.GraphJSONArrayCallback() {
                         @Override
                         public void onCompleted(JSONArray objects, GraphResponse response) {
                             try {
                                 for (int i = 0; i < objects.length(); i++) {
-                                    JSONObject friend = objects.getJSONObject(i);
-                                    friendsFBIDs.add(friend.getLong("id"));
+                                    JSONObject friendJSON = objects.getJSONObject(i);
+                                    Player friend = new Player();
+                                    friend.initWithPlayerData(friendJSON.getString("name"), friendJSON.getLong("id"), "");
+                                    friends.add(friend);
                                 }
                             } catch (JSONException e) {
                                 e.printStackTrace();
@@ -77,7 +80,7 @@ public class GraphRequests extends AsyncTask<GameRequest, Void, Object> {
                         }
                     });
             request.executeAndWait();
-            return friendsFBIDs;
+            return friends;
         } else if (path.contains("/?id=")) {
             final Player opponent = new Player();
             request = GraphRequest.newGraphPathRequest(accessToken, path, new GraphRequest.Callback() {
@@ -199,13 +202,9 @@ public class GraphRequests extends AsyncTask<GameRequest, Void, Object> {
         super.onPostExecute(player);
         if (player != null) {
             if (path == "/me") {
-                EditText yourNameToFill = (EditText) PlayerSelector.viewGroup.findViewById(R.id.yourNameToFill);
+                EditText yourNameToFill = PlayerSelector.viewGroup.findViewById(R.id.yourNameToFill);
                 yourNameToFill.setText(((Player) player).playerName);
             }
-//            else {
-//                EditText theirNameToFill = (EditText) FacebookGameSelected.layout.findViewById(R.id.theirFacebookNameToFill);
-//                theirNameToFill.setText(((Player) player).playerName);
-//            }
         }
     }
 }

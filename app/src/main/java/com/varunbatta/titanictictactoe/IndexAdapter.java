@@ -18,31 +18,22 @@ public class IndexAdapter extends BaseAdapter{
 	
 	@Override
 	public int getCount() {
-		// TODO Auto-generated method stub
 		return 9;
 	}
 
 	@Override
 	public Object getItem(int position) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public long getItemId(int position) {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
-//		if(position == 8){
-//			return playernames;
-//		}
-		
 		TextView tv = new TextView(context);
-		//LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		//View gridView;
 		
 		switch(position){
 			case 0: tv.setText(R.string.tic);
@@ -54,11 +45,8 @@ public class IndexAdapter extends BaseAdapter{
 			case 2: tv.setText(R.string.toe);
 					tv.setTextSize(40);
 			break;
-//			case 3: tv.setText("This is the enhanced version of Tic-Tac-Toe. Enjoy!");
 			case 4: tv.setText(R.string.guide);
 			break;
-//			case 5: tv.setText("Please enter the player's names below:");
-//			break;
 		}
 		
 		tv.setWidth((screenWidth - 40)/3);

@@ -15,7 +15,7 @@ import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
 
 public class Instructions extends Activity {
-	
+	// TODO: Seriously, make the instructions proper not just giant blocks of text
 	Context context;
 	
 	@Override

@@ -43,6 +43,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
+
+// TODO: DEPRECATE!!!
 public class LevelMenu extends Activity implements ConnectionCallbacks, OnConnectionFailedListener, ResultCallback<InitiateMatchResult> {
 	Context context;
 	boolean multiplayer;
@@ -51,24 +53,24 @@ public class LevelMenu extends Activity implements ConnectionCallbacks, OnConnec
 	boolean instructions;
 	String levelChoice;
     boolean reconnectOnce = true;
-	
+
 	// Request code to use when launching the resolution activity
     private static final int REQUEST_RESOLVE_ERROR = 1001;
     // Unique tag for the error dialog fragment
     private static final String DIALOG_ERROR = "dialog_error";
     // Bool to track whether the app is already resolving an error
     private boolean resolvingError = false;
-    
+
     private static final int RC_SAVED_GAMES = 9009;
-    
+
     private boolean success = false;
-    
+
     private byte [] gameData = null;
-    
+
     public static GoogleApiClient client = null;
-    
+
     boolean currentGamesChosen = false;
-    
+
     LinearLayout playerNamesLayout;
 	EditText player1;
 	public static String player1Name;
@@ -76,21 +78,21 @@ public class LevelMenu extends Activity implements ConnectionCallbacks, OnConnec
 	public static String player2Name;
 	TextView playerNames;
 	TextView playerNamesInstructions;
-	
+
 	AlertDialog.Builder playerNamesDialogBuilder;
 	AlertDialog playerNamesDialog;
-	
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.levelmenu);
-		
+
 		context = getApplicationContext();
-		
+
 		multiplayer = getIntent().getBooleanExtra("Multiplayer", false);
 		caller = getIntent().getStringExtra("Caller");
 		instructions = getIntent().getBooleanExtra("Instructions", false);
-		
+
 		client = new GoogleApiClient.Builder(this)
         .addApi(Plus.API)
         .addScope(Plus.SCOPE_PLUS_LOGIN)
@@ -101,7 +103,7 @@ public class LevelMenu extends Activity implements ConnectionCallbacks, OnConnec
         .addConnectionCallbacks(this)
         .addOnConnectionFailedListener(this)
         .build();
-		
+
 		LinearLayout menu = (LinearLayout) findViewById(R.id.levelMenuLayout);
 		TextView welcome = new TextView(context);
 		TextView title = new TextView(context);
@@ -114,75 +116,75 @@ public class LevelMenu extends Activity implements ConnectionCallbacks, OnConnec
 			welcome.setTextSize(30);
 			title.setTextSize(20);
 		}
-		welcome.setTextColor(Color.BLACK);	
-		welcome.setGravity(Gravity.CENTER_HORIZONTAL);		
+		welcome.setTextColor(Color.BLACK);
+		welcome.setGravity(Gravity.CENTER_HORIZONTAL);
 		title.setText("Please Select Level:");
-		title.setTextColor(Color.BLACK);		
+		title.setTextColor(Color.BLACK);
 		title.setGravity(Gravity.CENTER_HORIZONTAL);
-		
+
 		menu.setBackgroundColor(Color.rgb(0, 153, 153));
 		menu.addView(welcome);
 		menu.addView(title);
-		
+
 //		Button instructions = new Button(context);
 //		instructions.setText("Instructions");
 //		instructions.setOnClickListener(new View.OnClickListener() {
-//			
+//
 //			@Override
 //			public void onClick(View v) {
 //				Button instructionsButton = (Button) v;
 //				String instructionsHeading = instructionsButton.getText().toString();
 //				levels(instructionsHeading);
-//				
+//
 //			}
 //		});
 //		levelmenu.addView(instructions);
-		
+
 		playerNamesLayout = new LinearLayout(context);
 		playerNamesLayout.setOrientation(LinearLayout.VERTICAL);
-		
+
 		LayoutParams layoutParams = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
 		layoutParams.setMargins(0, 5, 0, 5);
-		
+
 //		playerNames = new TextView(context);
 //		playerNames.setText("Player Names");
 //		playerNames.setTextSize(40);
 //		playerNames.setTextColor(Color.BLACK);
 //		playerNames.setGravity(Gravity.CENTER_HORIZONTAL);
 //		playerNamesLayout.addView(playerNames);
-		
+
 		playerNamesInstructions = new TextView(context);
 		playerNamesInstructions.setText("Please enter the two player names below:");
 		playerNamesInstructions.setTextSize(20);
 		playerNamesInstructions.setTextColor(Color.BLACK);
 		playerNamesLayout.addView(playerNamesInstructions);
-		
+
 		player1 = new EditText(context);
 		player1.setHint("Player 1");
 		player1.setHintTextColor(Color.DKGRAY);
 		player1.setTextColor(Color.BLACK);
 		player1.setBackgroundColor(Color.WHITE);
 		playerNamesLayout.addView(player1, layoutParams);
-		
+
 		player2 = new EditText(context);
 		player2.setHint("Player 2");
 		player2.setHintTextColor(Color.DKGRAY);
 		player2.setTextColor(Color.BLACK);
 		player2.setBackgroundColor(Color.WHITE);
 		playerNamesLayout.addView(player2, layoutParams);
-		
+
 		playerNamesDialogBuilder = new AlertDialog.Builder(LevelMenu.this);
-		
+
 		playerNamesDialogBuilder.setTitle("Player Names");
 		playerNamesDialogBuilder.setView(playerNamesLayout);
-		
+
 		// Set up the buttons
-		playerNamesDialogBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() { 
+		playerNamesDialogBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 		    @Override
 		    public void onClick(DialogInterface dialog, int which) {
 		    	player1Name = player1.getText().toString();
 				player2Name = player2.getText().toString();
-			
+
 				if(player1Name.matches("")||player2Name.matches("")) {
 					Toast warning = Toast.makeText(context, "Sorry, but you must fill in the names of both players!", Toast.LENGTH_SHORT);
 					warning.show();
@@ -198,16 +200,16 @@ public class LevelMenu extends Activity implements ConnectionCallbacks, OnConnec
 		    }
 		});
 		playerNamesDialog = playerNamesDialogBuilder.create();
-		
+
 		Button level1 = new Button(context);
 		level1.setText("Level 1");
 		level1.setOnClickListener(new View.OnClickListener() {
-			
+
 			@Override
 			public void onClick(View v) {
 				Button levelChoiceButton = (Button) v;
 				levelChoice = levelChoiceButton.getText().toString();
-				
+
 				if ( !multiplayer ) {
 					playerNamesDialog.show();
 				} else {
@@ -216,16 +218,16 @@ public class LevelMenu extends Activity implements ConnectionCallbacks, OnConnec
 			}
 		});
 		menu.addView(level1);
-		
+
 		Button level2 = new Button(context);
 		level2.setText("Level 2");
 		level2.setOnClickListener(new View.OnClickListener() {
-			
+
 			@Override
 			public void onClick(View v) {
 				Button levelChoiceButton = (Button) v;
 				levelChoice = levelChoiceButton.getText().toString();
-				
+
 				if ( !multiplayer ) {
 					playerNamesDialog.show();
 				} else {
@@ -234,35 +236,35 @@ public class LevelMenu extends Activity implements ConnectionCallbacks, OnConnec
 			}
 		});
 		menu.addView(level2);
-		
+
 		Button level3 = new Button(context);
 		level3.setText("Level 3");
 		level3.setOnClickListener(new View.OnClickListener() {
-			
+
 			@Override
 			public void onClick(View v) {
 				Button levelChoiceButton = (Button) v;
 				String levelChoice = levelChoiceButton.getText().toString();
 				Toast.makeText(context, levelChoice + " is not available yet, sorry", Toast.LENGTH_SHORT).show();
-				
+
 			}
 		});
 		menu.addView(level3);
-		
+
 		Button level4 = new Button(context);
 		level4.setText("Level 4");
 		level4.setOnClickListener(new View.OnClickListener() {
-			
+
 			@Override
 			public void onClick(View v) {
 				Button levelChoiceButton = (Button) v;
 				String levelChoice = levelChoiceButton.getText().toString();
 				Toast.makeText(context, levelChoice + " is not available yet, sorry", Toast.LENGTH_SHORT).show();
-				
+
 			}
 		});
 		menu.addView(level4);
-		
+
 		if(multiplayer) {
 			Button matches = new Button(context);
 
@@ -275,14 +277,14 @@ public class LevelMenu extends Activity implements ConnectionCallbacks, OnConnec
 					String choice = choiceButton.getText().toString();
 					levels(choice);
 				}
-			});	
+			});
 			menu.addView(matches);
 		} else {
 			Button matches = new Button(context);
-			
+
 			matches.setText("Load Saved Game");
 			matches.setOnClickListener(new View.OnClickListener() {
-				
+
 				@Override
 				public void onClick(View v) {
 					Button choiceButton = (Button) v;
@@ -295,7 +297,7 @@ public class LevelMenu extends Activity implements ConnectionCallbacks, OnConnec
 //		Button multiplayer = new Button(getApplicationContext());
 //		multiplayer.setText("Multiplayer");
 //		multiplayer.setOnClickListener(new View.OnClickListener() {
-//			
+//
 //			@Override
 //			public void onClick(View v) {
 //				Button levelChoiceButton = (Button) v;
@@ -304,10 +306,10 @@ public class LevelMenu extends Activity implements ConnectionCallbacks, OnConnec
 //			}
 //		});
 //		levelmenu.addView(multiplayer);
-		
-		
+
+
 	}
-	
+
 	protected void levels(String levelChoice) {
 		level = new Intent(context, Board.class);
 		level.putExtra("Multiplayer", multiplayer);
@@ -320,12 +322,12 @@ public class LevelMenu extends Activity implements ConnectionCallbacks, OnConnec
 			level.putExtra("Player 2 Name", "Player 2");
 		}
 		if(caller.equals("Board") || caller.equals("Winner")) {
-			Board.keys = new Hashtable<Integer, Button>(6561);	
+			Board.keys = new Hashtable<Integer, Button>(6561);
 //			Board.bottomPanel.removeAllViews();
 //			Board.boardLayout.removeAllViews();
-			ButtonPressed.wincheck = new String [10][9];
-			ButtonPressed.metawincheck = new String [3][3];
-			Board.wincheck = new String [10][9];
+			ButtonPressed.winCheck = new String [10][9];
+			ButtonPressed.metaWinCheck = new String [3][3];
+			Board.winCheck = new String [10][9];
 			ButtonPressed.currentTurn = "";
 		}
 		switch(levelChoice){
@@ -432,11 +434,11 @@ public class LevelMenu extends Activity implements ConnectionCallbacks, OnConnec
     @Override
     public void onActivityResult(int request, int response, Intent data) {
         super.onActivityResult(request, response, data);
-        
+
         if (request == REQUEST_RESOLVE_ERROR) {
         	client.connect();
         }
-        
+
         if (request == 12345) {
             if (response != Activity.RESULT_OK) {
                 // user canceled
@@ -476,7 +478,7 @@ public class LevelMenu extends Activity implements ConnectionCallbacks, OnConnec
                 .createMatch(client, tbmc)
                 .setResultCallback(this);
         }
-        
+
         if (request == RC_SAVED_GAMES) {
         	if (data != null) {
     	        if (data.hasExtra(Snapshots.EXTRA_SNAPSHOT_METADATA)) {
@@ -486,7 +488,7 @@ public class LevelMenu extends Activity implements ConnectionCallbacks, OnConnec
     	                    data.getParcelableExtra(Snapshots.EXTRA_SNAPSHOT_METADATA);
     	            final String snapshotNm = snapshotMetadata.getUniqueName();
     	            Log.d("snapshotNm", snapshotNm);
-    	            
+
     	            AsyncTask<Void, Void, Integer> task = new AsyncTask<Void, Void, Integer>() {
     	                @Override
     	                protected Integer doInBackground(Void... params) {
@@ -514,14 +516,14 @@ public class LevelMenu extends Activity implements ConnectionCallbacks, OnConnec
     	            };
 
     	            task.execute();
-    	            
+
     	            while(!success) {
     	            	Log.d("success", "" + success);
     	            }
-    	            
+
     	            String [] playerNames = snapshotNm.split("-");
     	            int level = Integer.parseInt(playerNames[2].substring(5, playerNames[2].length()));
-    	            
+
     	            Intent board = new Intent(context, Board.class);
     	            board.putExtra("Multiplayer", false);
     	            board.putExtra("Caller", "CurrentGames");
@@ -606,15 +608,15 @@ public class LevelMenu extends Activity implements ConnectionCallbacks, OnConnec
 	public void startIntentActivity(Intent level2) {
 		startActivity(level2);
 	}
-	
+
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		boolean backPressed = false;
         if(keyCode == KeyEvent.KEYCODE_BACK) {
             backPressed = true;
-			ButtonPressed.wincheck = new String [10][9];
-			ButtonPressed.metawincheck = new String [3][3];
-			Board.wincheck = new String [10][9];
+			ButtonPressed.winCheck = new String [10][9];
+			ButtonPressed.metaWinCheck = new String [3][3];
+			Board.winCheck = new String [10][9];
 			ButtonPressed.currentTurn = "";
 			Intent mainMenuIntent = new Intent(context, MainMenu.class);
             startActivity(mainMenuIntent);

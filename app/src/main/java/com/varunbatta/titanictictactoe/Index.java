@@ -21,14 +21,12 @@ import android.view.Display;
 import android.view.View;
 import android.widget.Button;
 import android.widget.GridView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
-import com.facebook.applinks.AppLinks;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.google.android.gms.common.ConnectionResult;
@@ -48,8 +46,9 @@ import java.util.Hashtable;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
-public class Index<match> extends Activity implements GoogleApiClient.ConnectionCallbacks, 
+public class Index<match> extends Activity implements GoogleApiClient.ConnectionCallbacks,
 GoogleApiClient.OnConnectionFailedListener, OnInvitationReceivedListener, OnTurnBasedMatchUpdateReceivedListener {
+	// TODO: Clean up these variables to see what is necessary here and what is not
 	Context context;
     public static NotificationManager notificationManager;
 	public static boolean receiving = false;
@@ -73,7 +72,7 @@ GoogleApiClient.OnConnectionFailedListener, OnInvitationReceivedListener, OnTurn
 			Log.d("oSD", "on Service Disconnected");
 			remoteService = null;
 		}
-		
+
 	};
 
 	public static Map<Long, Game> availableGames = new HashMap<Long, Game>();
@@ -159,37 +158,25 @@ GoogleApiClient.OnConnectionFailedListener, OnInvitationReceivedListener, OnTurn
                 board.putExtra("Multiplayer", true);
                 board.putExtra("GameRequestID", Long.parseLong(requestIdsList[0]));
                 startActivity(board);
-//                this.finish();
             }
         }
-//        if (getIntent().getFlags() == 335544320) {
-//            googlePlayGamesServicesActivity = true;
-//        }
 
-//		if (getIntent().getByteArrayExtra("Game") != null) {
-//            notificationMatch = getIntent().getByteArrayExtra("Game");
-//            notificationActivity = true;
-//        }
 		setContentView(R.layout.index);
 		context = getApplicationContext();
 
 		notificationManager = (NotificationManager) getSystemService(context.NOTIFICATION_SERVICE);
-		
-//		bindService(new Intent(context, NotificationService.class), serviceConnection, BIND_AUTO_CREATE);
-		startService(new Intent(context, NotificationService.class));
 
-		RelativeLayout indexLayout = (RelativeLayout) findViewById(R.id.indexLayout);
-//		indexLayout.setBackgroundColor(Color.BLUE);
+		startService(new Intent(context, NotificationService.class));
 
 		Display display = getWindowManager().getDefaultDisplay();
 		Point size = new Point();
 		display.getSize(size);
 		int width = size.x;
 		
-		GridView game = (GridView) findViewById(R.id.introScreenBoard);
+		GridView game = findViewById(R.id.introScreenBoard);
 		game.setAdapter(new IndexAdapter(this, width));
 		
-		Button play = (Button) findViewById(R.id.play_button);
+		Button play = findViewById(R.id.play_button);
 		play.setOnClickListener(new View.OnClickListener() {		
 			@Override
 			public void onClick(View v) {
@@ -198,27 +185,7 @@ GoogleApiClient.OnConnectionFailedListener, OnInvitationReceivedListener, OnTurn
 				index.finish();
 			}
 		});
-		
-//		Log.d("bGAC", "Reached");
-//		buildGoogleApiClient();
-//
-//		client.connect();
-//		Log.d("Client", "Connected");
 	}
-	
-//	public void buildGoogleApiClient() {
-//		client = new GoogleApiClient.Builder(this)
-//		.addApi(Plus.API)
-//		.addScope(Plus.SCOPE_PLUS_LOGIN)
-//        .addScope(Plus.SCOPE_PLUS_PROFILE)
-//		.addApi(Games.API)
-//		.addScope(Games.SCOPE_GAMES)
-//		.addApi(Drive.API)
-//        .addScope(Drive.SCOPE_APPFOLDER)
-//		.addConnectionCallbacks(this)
-//		.addOnConnectionFailedListener(this)
-//		.build();
-//	}
 
 	private void getListOfOpponents(String [] requestIdsList) {
 	    int gamesCount = requestIdsList.length;
@@ -285,13 +252,6 @@ GoogleApiClient.OnConnectionFailedListener, OnInvitationReceivedListener, OnTurn
                 .show();
     }
 
-//	@Override
-//	public void onRestoreInstanceState(Bundle instanceState) {
-//		super.onRestoreInstanceState(instanceState);
-//		Intent board = new Intent(getApplicationContext(), Board.class);
-//		board.putExtra("On Going Match", savedInstanceState.getByteArray("On Going Match"));
-//		startActivity(board);
-//	}
 	private String getPlayer(byte [] game, int player) {
         String gameArray = new String(game);
         String [] rows = gameArray.split(";");
@@ -342,8 +302,6 @@ GoogleApiClient.OnConnectionFailedListener, OnInvitationReceivedListener, OnTurn
 			board[i] = rows[i].split(",");
 		}
 
-//        Log.d("bL", board[board.length - 1].toString());
-
 		return board[board.length - 1][6];
 	}
 
@@ -357,91 +315,6 @@ GoogleApiClient.OnConnectionFailedListener, OnInvitationReceivedListener, OnTurn
 
         return !board[board.length - 1][6].equals("null");
     }
-
-	//	@Override
-//	public void onResult(InitiateMatchResult arg0) {
-//		// TODO Auto-generated method stub
-//		Log.d("TBMP", "Turn Based Match Received");
-//		Toast display = Toast.makeText(getApplicationContext(), "Turn Based Match Received", Toast.LENGTH_SHORT);
-//		display.show();
-//	}
-//	@Override
-//	public void onTurnBasedMatchReceived(TurnBasedMatch match) {
-//		byte [] game = match.getData();
-//		
-//		Toast display = Toast.makeText(getApplicationContext(), "Turn Based Match Received", Toast.LENGTH_SHORT);
-//		display.show();
-//		
-//		Intent board = new Intent(this, Board.class);
-//		board.putExtra("Level", 2);
-//		board.putExtra("On Going Match", game);
-//		startActivity(board);
-//	}
-//
-//	@Override
-//	public void onTurnBasedMatchRemoved(String arg0) {
-//		// TODO Auto-generated method stub
-//		
-//	}
-//
-//	public void registerTurnBasedClient(GoogleApiClient currentClient) {
-////		Log.d("rTBC", "Registering...");
-//		Games.TurnBasedMultiplayer.registerMatchUpdateListener(currentClient, notificationService.getContext());
-//	}
-//
-//	@Override
-//	public void onInvitationReceived(Invitation arg0) {
-//		Toast.makeText(getApplication(), "Invitation Received", Toast.LENGTH_SHORT).show();
-//		
-//	}
-//
-//	@Override
-//	public void onInvitationRemoved(String arg0) {
-//		// TODO Auto-generated method stub
-//		
-//	}
-//
-//	@Override
-//	public void onTurnBasedMatchReceived(TurnBasedMatch arg0) {
-//		// TODO Auto-generated method stub
-//		Log.d("TBMR", "on Turn Based Match Received");
-//	}
-//
-//	@Override
-//	public void onTurnBasedMatchRemoved(String arg0) {
-//		// TODO Auto-generated method stub
-//		
-//	}
-//
-//	@Override
-//	public void onInvitationReceived(Invitation arg0) {
-//		// TODO Auto-generated method stub
-//		
-//	}
-//
-//	@Override
-//	public void onInvitationRemoved(String arg0) {
-//		// TODO Auto-generated method stub
-//		
-//	}
-//
-//	@Override
-//	public void onConnectionFailed(ConnectionResult arg0) {
-//		// TODO Auto-generated method stub
-//		
-//	}
-//
-//	@Override
-//	public void onConnected(Bundle arg0) {
-//		// TODO Auto-generated method stub
-//		
-//	}
-//
-//	@Override
-//	public void onConnectionSuspended(int arg0) {
-//		// TODO Auto-generated method stub
-//		
-//	}
 
 	@Override
 	public void onTurnBasedMatchReceived(TurnBasedMatch match) {
@@ -461,9 +334,7 @@ GoogleApiClient.OnConnectionFailedListener, OnInvitationReceivedListener, OnTurn
 			Games.TurnBasedMultiplayer.finishMatch(client, match.getMatchId());
 			board.savedGameRecreate(match.getData());//, context);
 			
-			Board.keys = new Hashtable<Integer, Button>(6561);
-//			Board.bottomPanel.removeAllViews();
-//			Board.boardLayout.removeAllViews();
+			Board.keys = new Hashtable<>(6561);
 			ButtonPressed.currentTurn = "";
 			board.finishActivity(context, true, opponentName);
 		} else if ( currentPlayerParticipantResult != null && currentPlayerParticipantResult.getResult() == ParticipantResult.MATCH_RESULT_TIE) {
@@ -476,9 +347,7 @@ GoogleApiClient.OnConnectionFailedListener, OnInvitationReceivedListener, OnTurn
 			Games.TurnBasedMultiplayer.finishMatch(client, match.getMatchId());
 			board.savedGameRecreate(match.getData());//, context);
 			
-			Board.keys = new Hashtable<Integer, Button>(6561);
-//			Board.bottomPanel.removeAllViews();
-//			Board.boardLayout.removeAllViews();
+			Board.keys = new Hashtable<>(6561);
 			ButtonPressed.currentTurn = "";
 			board.finishActivity(context, true, "Tie");
 		} else if ( match.getTurnStatus() == TurnBasedMatch.MATCH_TURN_STATUS_MY_TURN) {
@@ -495,36 +364,28 @@ GoogleApiClient.OnConnectionFailedListener, OnInvitationReceivedListener, OnTurn
 			turnIntent.putExtra("Can Rematch", true);
 			turnIntent.putExtra("Multiplayer", true);
 
-			board.savedGameRecreate(game);//, context);
+			board.savedGameRecreate(game);
 			
-			int level = Integer.parseInt(Board.wincheck[Board.wincheck.length - 1][5]);
-			int row = Integer.parseInt(Board.wincheck[Board.wincheck.length - 1][0]);
-			int column = Integer.parseInt(Board.wincheck[Board.wincheck.length - 1][1]);
+			int level = Integer.parseInt(Board.winCheck[Board.winCheck.length - 1][5]);
+			int row = Integer.parseInt(Board.winCheck[Board.winCheck.length - 1][0]);
+			int column = Integer.parseInt(Board.winCheck[Board.winCheck.length - 1][1]);
 			int multiplier = (int) Math.pow(3, (double) level);
 			int key = row * multiplier + column;
 			
 			String turn = "";
 			TextView playerTurn = board.findViewById(R.id.player_turn);
-			if ( (match.getParticipant(getCurrentParticipantId(game)).getDisplayName()).equals(Board.wincheck[Board.wincheck.length - 1][2]) ) {
-				Board.wincheck[Board.wincheck.length - 1][4] = "X";
+			if ( (match.getParticipant(getCurrentParticipantId(game)).getDisplayName()).equals(Board.winCheck[Board.winCheck.length - 1][2]) ) {
+				Board.winCheck[Board.winCheck.length - 1][4] = "X";
 				turn = "O";
-				playerTurn.setText(Board.wincheck[Board.wincheck.length - 1][2] + "'s Turn");
+				playerTurn.setText(Board.winCheck[Board.winCheck.length - 1][2] + "'s Turn");
 			}
-			else if ( (match.getParticipant(getCurrentParticipantId(game)).getDisplayName()).equals(Board.wincheck[Board.wincheck.length - 1][3]) ) {
-				Board.wincheck[Board.wincheck.length - 1][4] = "O";
+			else if ( (match.getParticipant(getCurrentParticipantId(game)).getDisplayName()).equals(Board.winCheck[Board.winCheck.length - 1][3]) ) {
+				Board.winCheck[Board.winCheck.length - 1][4] = "O";
 				turn = "X";
-				playerTurn.setText(Board.wincheck[Board.wincheck.length - 1][3] + "'s Turn");
+				playerTurn.setText(Board.winCheck[Board.winCheck.length - 1][3] + "'s Turn");
 			}
 			
-			ButtonPressed.currentTurn = Board.wincheck[Board.wincheck.length - 1][4];
-			
-//			if(Board.wincheck[Board.wincheck.length - 1][4].equals("X")) {
-//				turn = "O";
-//				ButtonPressed.playerturn.setText(Board.wincheck[Board.wincheck.length - 1][2] + "'s Turn");
-//			} else {
-//				turn = "X";
-//				ButtonPressed.playerturn.setText(Board.wincheck[Board.wincheck.length - 1][3] + "'s Turn");
-//			}
+			ButtonPressed.currentTurn = Board.winCheck[Board.winCheck.length - 1][4];
 			
 			Button opponentMove = Board.keys.get(key);
 			opponentMove.setText(turn);
@@ -536,11 +397,11 @@ GoogleApiClient.OnConnectionFailedListener, OnInvitationReceivedListener, OnTurn
 				bp.boardChanger(row, column, level, true);
 			}
 			
-			if ( !bp.winChecker(row, column, level, level, Board.wincheck, turn) && ButtonPressed.metawincheck[row/3][column/3] == null) {
+			if ( !bp.winChecker(row, column, level, level, Board.winCheck, turn) && ButtonPressed.metaWinCheck[row/3][column/3] == null) {
 				for ( int i = 0; i < multiplier; i++ ) {
 					for ( int j = 0; j < multiplier; j++ ) {
 						int buttonKey = i * multiplier + j;
-						String metaValue = ButtonPressed.metawincheck[i/3][j/3];
+						String metaValue = ButtonPressed.metaWinCheck[i/3][j/3];
 						if(metaValue == null) {
 							Log.d("buttonKey", "" + buttonKey);
 							Button button = Board.keys.get(buttonKey);
@@ -554,22 +415,18 @@ GoogleApiClient.OnConnectionFailedListener, OnInvitationReceivedListener, OnTurn
 
 	@Override
 	public void onTurnBasedMatchRemoved(String arg0) {
-//		Log.d("TBMR", "onTurnBasedMatchRemoved " + arg0);
 	}
 
 	@Override
 	public void onInvitationReceived(Invitation arg0) {
-//		Log.d("IR", "onInvitationReceived");
 	}
 
 	@Override
 	public void onInvitationRemoved(String arg0) {
-//		Log.d("IR", "onInvitationRemoved");
 	}
 
 	@Override
 	public void onConnectionFailed(ConnectionResult result) {
-//		Log.d("CF", "onConnectionFailed");
 		if (resolvingError) {
             // Already attempting to resolve an error.
             return;
@@ -583,21 +440,16 @@ GoogleApiClient.OnConnectionFailedListener, OnInvitationReceivedListener, OnTurn
                 client.connect();
             }
         } else {
-            // Show dialog using GooglePlayServicesUtil.getErrorDialog()
-//            showErrorDialog(result.getErrorCode());
             resolvingError = true;
         }
 	}
 
 	@Override
 	public void onConnected(Bundle connectionHint) {
-//		Log.d("C", "" + connectionHint);
 		SharedPreferences savedGame = PreferenceManager.getDefaultSharedPreferences(context);
 		if(connectionHint != null) {
-//            Log.d("cH", "not null");
 			match = connectionHint.getParcelable(Multiplayer.EXTRA_TURN_BASED_MATCH);
-//			Log.d("Match", "Received!");
-			
+
 			if(match != null) {
 				byte [] game = match.getData();
 				String matchId = match.getMatchId();
@@ -608,9 +460,6 @@ GoogleApiClient.OnConnectionFailedListener, OnInvitationReceivedListener, OnTurn
 				if(!finished) {
 					myTurn = true;
 				}
-				
-//				Toast display = Toast.makeText(context, "Turn Based Match Received", Toast.LENGTH_SHORT);
-//				display.show();
 				
 				Intent board = new Intent(this, Board.class);
 				board.putExtra("Level", level);
@@ -660,7 +509,6 @@ GoogleApiClient.OnConnectionFailedListener, OnInvitationReceivedListener, OnTurn
 			Log.d("gS", gameString);
 			if ( gameString.contains("X") || gameString.contains("O") ) {
 				Intent board = new Intent(context, Board.class);
-//				board.putExtra("On Going Match", game);
 				board.putExtra("Level", getLevel(game));
                 Log.d("MatchID", getMatchId(game));
 				board.putExtra("Match ID", getMatchId(game));
@@ -708,8 +556,6 @@ GoogleApiClient.OnConnectionFailedListener, OnInvitationReceivedListener, OnTurn
 		ArrayList<String> participantIds = match.getParticipantIds();
 		String pendingParticipantId = "";
 		String currentParticipantId = match.getParticipantId(Games.Players.getCurrentPlayerId(client));
-//		Log.d("cPId", currentParticipantId);
-//        Log.d("pIds", "" + participantIds);
 		if( currentParticipantId.equals( participantIds.get(0) ) ) {
 			pendingParticipantId = participantIds.get(1);
 		}

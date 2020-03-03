@@ -9,6 +9,7 @@ import android.widget.Button;
 import android.widget.Toast;
 
 public class MainMenu extends Activity {
+    // TODO: Redraw this using recycler views and perhaps just generally (see how it is more popularly handled)
 
 	Context context;
 	
@@ -19,7 +20,7 @@ public class MainMenu extends Activity {
 		
 		context = MainMenu.this;
 
-        Button instructionsButton = (Button) findViewById(R.id.instructionsButton);
+        Button instructionsButton = findViewById(R.id.instructionsButton);
         instructionsButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -28,7 +29,7 @@ public class MainMenu extends Activity {
 			}
 		});
 
-        Button level1Button = (Button) findViewById(R.id.level1Button);
+        Button level1Button = findViewById(R.id.level1Button);
         level1Button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -36,7 +37,7 @@ public class MainMenu extends Activity {
             }
         });
 
-        Button level2Button = (Button) findViewById(R.id.level2Button);
+        Button level2Button = findViewById(R.id.level2Button);
         level2Button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -44,7 +45,7 @@ public class MainMenu extends Activity {
             }
         });
 
-        Button level3Button = (Button) findViewById(R.id.level3Button);
+        Button level3Button = findViewById(R.id.level3Button);
         level3Button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -52,7 +53,7 @@ public class MainMenu extends Activity {
             }
         });
 
-        Button level4Button = (Button) findViewById(R.id.level4Button);
+        Button level4Button = findViewById(R.id.level4Button);
         level4Button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -79,6 +80,5 @@ public class MainMenu extends Activity {
         Intent playerSelectorIntent = new Intent(context, PlayerSelector.class);
 		playerSelectorIntent.putExtra("Level", level);
 		startActivity(playerSelectorIntent);
-//		this.finish();
 	}
 }

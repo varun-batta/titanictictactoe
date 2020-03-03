@@ -52,7 +52,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 public class CurrentGames extends Activity implements ConnectionCallbacks, OnConnectionFailedListener {
-
+    // TODO: This entire file needs to be refactored and cleaned up
 	public static GoogleApiClient client;
 	public static boolean currentGamesVisible;
 	
@@ -74,13 +74,13 @@ public class CurrentGames extends Activity implements ConnectionCallbacks, OnCon
     
     private byte [] gameData = null;
     private boolean success = false;
-    
+
     private AlphaAnimation inAnimation;
     private AlphaAnimation outAnimation;
 
     private FrameLayout progressBarHolder;
     private ScrollView currentGamesScrollView;
-    
+
     String [] gameOptions;
     boolean cancel;
 	
@@ -88,7 +88,7 @@ public class CurrentGames extends Activity implements ConnectionCallbacks, OnCon
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.currentgames);
-		
+
 //		currentGamesScrollView = findViewById(R.id.currentGamesScrollView);
 //		currentGamesScrollView.setBackgroundColor(Color.rgb(0, 173, 173));
 		
@@ -876,7 +876,7 @@ public class CurrentGames extends Activity implements ConnectionCallbacks, OnCon
 
 	                    // Change data but leave existing metadata
 	                    Snapshot snapshot = open.getSnapshot();
-	                    snapshot.getSnapshotContents().writeBytes(wincheckerToByteArray(Board.wincheck));
+	                    snapshot.getSnapshotContents().writeBytes(wincheckerToByteArray(Board.winCheck));
 
 	                    Snapshots.CommitSnapshotResult commit = Games.Snapshots.commitAndClose(
 	                            client, snapshot, SnapshotMetadataChange.EMPTY_CHANGE).await();
