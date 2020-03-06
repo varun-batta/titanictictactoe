@@ -150,8 +150,8 @@ public class CurrentGames extends Activity implements ConnectionCallbacks, OnCon
                         if (task.isSuccessful()) {
 //                            onConnected(task.getResult());
                         } else {
-                            Intent signInIntent = signInClient.getSignInIntent();
-                            startActivityForResult(signInIntent, RC_SIGN_IN);
+//                            Intent signInIntent = signInClient.getSignInIntent();
+//                            startActivityForResult(signInIntent, RC_SIGN_IN);
                         }
                     }
                 });
@@ -449,6 +449,7 @@ public class CurrentGames extends Activity implements ConnectionCallbacks, OnCon
 		switch(option) {
 		case "Play Game":
 			Log.d("PGC", "Play Game Called");
+			Index.receiving = true;
             Intent board = new Intent(getApplicationContext(), Board.class);
             board.putExtra("Level", currentGames.get(requestID).level);
             board.putExtra("Player 1 Name", currentGames.get(requestID).player1.playerName);

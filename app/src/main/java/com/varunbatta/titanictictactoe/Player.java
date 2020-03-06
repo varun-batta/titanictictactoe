@@ -9,7 +9,7 @@ public class Player {
     long playerFBID;
     String turn;
 
-    Player() {
+    public Player() {
         this.playerName = "";
         this.playerFBID = -1;
         this.turn = "";

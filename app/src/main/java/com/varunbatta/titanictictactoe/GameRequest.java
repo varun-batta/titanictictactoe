@@ -14,7 +14,7 @@ public class GameRequest {
     public Map<String, String> parameters;
     public HttpMethod httpMethod;
 
-    GameRequest() {
+    public GameRequest() {
         graphPath = "";
         parameters = new HashMap<>();
         httpMethod = HttpMethod.GET;

@@ -1,20 +1,21 @@
 package com.varunbatta.titanictictactoe;
 
 /**
- * Created by varun on 3/1/2018.
+ * Game - The model containing the game data including data to recreate the game
  */
 
 public class Game {
-    Player player1;
-    Player player2;
-    String [][] data;
-    String lastMove;
-    int lastMoveRow;
-    int lastMoveColumn;
-    int level;
-    long requestID;
 
-    Game() {
+    public Player player1;
+    public Player player2;
+    public String [][] data;
+    public String lastMove;
+    public int lastMoveRow;
+    public int lastMoveColumn;
+    public int level;
+    public long requestID;
+
+    public Game() {
         player1 = new Player();
         player2 = new Player();
         data = new String[10][9];
@@ -25,6 +26,7 @@ public class Game {
         requestID = 0;
     }
 
+    // TODO: Deprecate if necessary
     public Game createNewGame(Player player1, Player player2, String[][] data, long requestID) {
         this.player1 = player1;
         this.player2 = player2;

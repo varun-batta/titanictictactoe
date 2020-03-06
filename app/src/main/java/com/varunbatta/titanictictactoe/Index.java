@@ -17,12 +17,14 @@ import android.preference.PreferenceManager;
 import androidx.appcompat.app.AlertDialog;
 import android.util.Base64;
 import android.util.Log;
+import android.util.LongSparseArray;
 import android.view.Display;
 import android.view.View;
 import android.widget.Button;
 import android.widget.GridView;
 import android.widget.TextView;
 
+import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
@@ -38,16 +40,17 @@ import com.google.android.gms.games.multiplayer.OnInvitationReceivedListener;
 import com.google.android.gms.games.multiplayer.ParticipantResult;
 import com.google.android.gms.games.multiplayer.turnbased.OnTurnBasedMatchUpdateReceivedListener;
 import com.google.android.gms.games.multiplayer.turnbased.TurnBasedMatch;
+import com.varunbatta.titanictictactoe.facebookAPI.FacebookAPIListener;
+import com.varunbatta.titanictictactoe.facebookAPI.FacebookAPIManager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 
 public class Index<match> extends Activity implements GoogleApiClient.ConnectionCallbacks,
-GoogleApiClient.OnConnectionFailedListener, OnInvitationReceivedListener, OnTurnBasedMatchUpdateReceivedListener {
+GoogleApiClient.OnConnectionFailedListener, OnInvitationReceivedListener, OnTurnBasedMatchUpdateReceivedListener, FacebookAPIListener {
 	// TODO: Clean up these variables to see what is necessary here and what is not
 	Context context;
     public static NotificationManager notificationManager;
@@ -75,7 +78,7 @@ GoogleApiClient.OnConnectionFailedListener, OnInvitationReceivedListener, OnTurn
 
 	};
 
-	public static Map<Long, Game> availableGames = new HashMap<Long, Game>();
+	public static LongSparseArray<Game> availableGames = new LongSparseArray<>();
 	
     public static GoogleApiClient client = null;
 	public TurnBasedMatch match;
@@ -88,6 +91,9 @@ GoogleApiClient.OnConnectionFailedListener, OnInvitationReceivedListener, OnTurn
     Index index;
 
 	CallbackManager loginCallbackManager;
+
+	private String [] requestIdsList;
+	public FacebookAPIManager facebookAPIManager;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -97,6 +103,10 @@ GoogleApiClient.OnConnectionFailedListener, OnInvitationReceivedListener, OnTurn
 			FacebookSdk.sdkInitialize(getApplicationContext(), 2809);
 		}
 
+		// Initiate facebookAPIManager
+		facebookAPIManager = FacebookAPIManager.getInstance(this.getApplicationContext());
+
+		// TODO: See if this is necessary since it is never actually used for anything other than logs
 		loginCallbackManager = CallbackManager.Factory.create();
 		LoginManager.getInstance().registerCallback(loginCallbackManager,
 				new FacebookCallback<LoginResult>() {
@@ -116,49 +126,56 @@ GoogleApiClient.OnConnectionFailedListener, OnInvitationReceivedListener, OnTurn
 					}
 				});
 
-		LoginManager.getInstance().logInWithReadPermissions(this, Arrays.asList("public_profile", "email", "user_friends"));
+		// Login as necessary
+		if (AccessToken.getCurrentAccessToken() == null) {
+			LoginManager.getInstance().logInWithReadPermissions(this, Arrays.asList("public_profile", "email", "user_friends"));
+		}
 
-
+		// TODO: Get this back to normal
 		Uri targetUrl = null; //AppLinks.getTargetUrlFromInboundIntent(this.context, getIntent());
         if (targetUrl != null) {
             Log.i("Activity", "App Link Target URL: " + targetUrl.toString());
             facebookGame = true;
             String requestIdsWithKey = targetUrl.toString().split("&")[1];
             String requestIds = requestIdsWithKey.split("=")[1];
-            String [] requestIdsList = requestIds.replace("%2C", ",").split(",");
+            requestIdsList = requestIds.replace("%2C", ",").split(",");
 
-            if (requestIdsList.length > 1) {
-                getListOfOpponents(requestIdsList);
-            } else {
-                try {
-                    Map<String, String> parameters = new HashMap<String, String>();
-                    parameters.put("fields", "ids, action_type, application, created_time, date, from, messages, object, to");
-                    GameRequest opponentRequest = new GameRequest();
-                    opponentRequest.createNewGameRequest("/" + requestIdsList[0], parameters, null);
-                    availableGames.put(Long.parseLong(requestIdsList[0]), (Game) new GraphRequests().execute(opponentRequest).get());
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                } catch (ExecutionException e) {
-                    e.printStackTrace();
-                }
-                Intent board = new Intent(getApplicationContext(), Board.class);
-                board.putExtra("Level", Integer.parseInt(availableGames.get(Long.parseLong(requestIdsList[0])).data[9][3]));
-                board.putExtra("Player 1 Name", availableGames.get(availableGames.keySet().toArray()[0]).player1.playerName);
-                board.putExtra("Player 2 Name", availableGames.get(availableGames.keySet().toArray()[0]).player2.playerName);
-                if (availableGames.get(availableGames.keySet().toArray()[0]).lastMove.equals("X")) {
-                    board.putExtra("Pending Player", availableGames.get(availableGames.keySet().toArray()[0]).player1.playerFBID);
-                    board.putExtra("Current Player", availableGames.get(availableGames.keySet().toArray()[0]).player2.playerFBID);
-                } else {
-                    board.putExtra("Pending Player", availableGames.get(availableGames.keySet().toArray()[0]).player2.playerFBID);
-                    board.putExtra("Current Player", availableGames.get(availableGames.keySet().toArray()[0]).player1.playerFBID);
-                }
-                board.putExtra("Caller", "Index");
-                board.putExtra("My Turn", true);
-                board.putExtra("Finished", false);
-                board.putExtra("Multiplayer", true);
-                board.putExtra("GameRequestID", Long.parseLong(requestIdsList[0]));
-                startActivity(board);
-            }
+			facebookAPIManager.placeOpponentRequests(requestIdsList, this);
+//            if (requestIdsList.length > 1) {
+//                getListOfOpponents(requestIdsList);
+//            } else {
+////                try {
+////                    Map<String, String> parameters = new HashMap<String, String>();
+////                    parameters.put("fields", "ids, action_type, application, created_time, date, from, messages, object, to");
+////                    parameters.put("access_token", AccessToken.getCurrentAccessToken().getToken());
+////                    GameRequest opponentRequest = new GameRequest();
+////                    opponentRequest.createNewGameRequest("/" + requestIdsList[0], parameters, null);
+////                    availableGames.put(Long.parseLong(requestIdsList[0]), (Game) new GraphRequests().execute(opponentRequest).get());
+//				facebookAPIManager.placeOpponentRequests(requestIdsList);
+//
+////                } catch (InterruptedException e) {
+////                    e.printStackTrace();
+////                } catch (ExecutionException e) {
+////                    e.printStackTrace();
+////                }
+////                Intent board = new Intent(getApplicationContext(), Board.class);
+////                board.putExtra("Level", Integer.parseInt(availableGames.get(Long.parseLong(requestIdsList[0])).data[9][3]));
+////                board.putExtra("Player 1 Name", availableGames.get(availableGames.keySet().toArray()[0]).player1.playerName);
+////                board.putExtra("Player 2 Name", availableGames.get(availableGames.keySet().toArray()[0]).player2.playerName);
+////                if (availableGames.get(availableGames.keySet().toArray()[0]).lastMove.equals("X")) {
+////                    board.putExtra("Pending Player", availableGames.get(availableGames.keySet().toArray()[0]).player1.playerFBID);
+////                    board.putExtra("Current Player", availableGames.get(availableGames.keySet().toArray()[0]).player2.playerFBID);
+////                } else {
+////                    board.putExtra("Pending Player", availableGames.get(availableGames.keySet().toArray()[0]).player2.playerFBID);
+////                    board.putExtra("Current Player", availableGames.get(availableGames.keySet().toArray()[0]).player1.playerFBID);
+////                }
+////                board.putExtra("Caller", "Index");
+////                board.putExtra("My Turn", true);
+////                board.putExtra("Finished", false);
+////                board.putExtra("Multiplayer", true);
+////                board.putExtra("GameRequestID", Long.parseLong(requestIdsList[0]));
+////                startActivity(board);
+//            }
         }
 
 		setContentView(R.layout.index);
@@ -180,77 +197,78 @@ GoogleApiClient.OnConnectionFailedListener, OnInvitationReceivedListener, OnTurn
 		play.setOnClickListener(new View.OnClickListener() {		
 			@Override
 			public void onClick(View v) {
-				Intent mainmenu = new Intent(context, MainMenu.class);
-				startActivity(mainmenu);
+				Intent mainMenu = new Intent(context, MainMenu.class);
+				startActivity(mainMenu);
 				index.finish();
 			}
 		});
 	}
 
-	private void getListOfOpponents(String [] requestIdsList) {
-	    int gamesCount = requestIdsList.length;
-	    int start = 0;
-	    if (requestIdsList[0].equals("user_friends")) {
-	        gamesCount -= 1;
-	        start += 1;
-        }
-        if (requestIdsList[0].equals("public_profile") || requestIdsList[1].equals("public_profile")) {
-	        gamesCount -= 1;
-	        start += 1;
-        }
-	    for (int i = start; i < requestIdsList.length; i++) {
-            try {
-                Map<String, String> parameters = new HashMap<String, String>();
-                parameters.put("fields", "ids, action_type, application, created_time, date, from, messages, object, to");
-                GameRequest opponentRequest = new GameRequest();
-                opponentRequest.createNewGameRequest("/" + requestIdsList[i], parameters, null);
-                Game game = (Game) new GraphRequests().execute(opponentRequest).get();
-                if (!game.lastMove.equals("")) {
-                    availableGames.put(Long.parseLong(requestIdsList[i]), game);
-                }
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (ExecutionException e) {
-                e.printStackTrace();
-            }
-        }
-        CharSequence[] opponents = new CharSequence[availableGames.size()];
-	    for (int i = 0; i < availableGames.size(); i++) {
-	        if (availableGames.get(availableGames.keySet().toArray()[i]).lastMove.equals("X")) {
-	            opponents[i] = availableGames.get(availableGames.keySet().toArray()[i]).player1.playerName;
-            } else if (availableGames.get(availableGames.keySet().toArray()[i]).lastMove.equals("O")) {
-	            opponents[i] = availableGames.get(availableGames.keySet().toArray()[i]).player2.playerName;
-            }
-        }
-        new AlertDialog.Builder(this)
-                .setTitle("Choose an Opponent")
-                .setItems(opponents, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int i) {
-                        // The 'which' argument contains the index position
-                        // of the selected item
-                        Intent board = new Intent(context, Board.class);
-                        board.putExtra("Level", Integer.parseInt(availableGames.get(availableGames.keySet().toArray()[i]).data[9][3]));
-                        board.putExtra("Player 1 Name", availableGames.get(availableGames.keySet().toArray()[i]).player1.playerName);
-                        board.putExtra("Player 2 Name", availableGames.get(availableGames.keySet().toArray()[i]).player2.playerName);
-                        if (availableGames.get(availableGames.keySet().toArray()[i]).lastMove.equals("X")) {
-                            board.putExtra("Pending Player", availableGames.get(availableGames.keySet().toArray()[i]).player1.playerFBID);
-                            board.putExtra("Current Player", availableGames.get(availableGames.keySet().toArray()[i]).player2.playerFBID);
-                        } else {
-                            board.putExtra("Pending Player", availableGames.get(availableGames.keySet().toArray()[i]).player2.playerFBID);
-                            board.putExtra("Current Player", availableGames.get(availableGames.keySet().toArray()[i]).player1.playerFBID);
-                        }
-                        board.putExtra("Caller", "Index");
-                        board.putExtra("My Turn", true);
-                        board.putExtra("Finished", false);
-                        board.putExtra("Multiplayer", true);
-                        board.putExtra("GameRequestID", availableGames.get(availableGames.keySet().toArray()[i]).requestID);
-                        index.finish();
-                        startActivity(board);
-                    }
-                })
-                .create()
-                .show();
-    }
+//	private void getListOfOpponents(String [] requestIdsList) {
+////	    int start = 0;
+////	    if (requestIdsList[0].equals("user_friends")) {
+////	        start += 1;
+////        }
+////        if (requestIdsList[0].equals("public_profile") || requestIdsList[1].equals("public_profile")) {
+////	        start += 1;
+////        }
+////	    for (int i = start; i < requestIdsList.length; i++) {
+//////            try {
+////                Map<String, String> parameters = new HashMap<>();
+////                parameters.put("fields", "ids, action_type, application, created_time, date, from, messages, object, to");
+////                GameRequest opponentRequest = new GameRequest();
+////                opponentRequest.createNewGameRequest("/" + requestIdsList[i], parameters, null);
+////                facebookAPIManager.placeOpponentRequests();
+//////                Game game = (Game) new GraphRequests().execute(opponentRequest).get();
+//////                if (!game.lastMove.equals("")) {
+//////                    availableGames.put(Long.parseLong(requestIdsList[i]), game);
+//////                }
+//////            } catch (InterruptedException e) {
+//////                e.printStackTrace();
+//////            } catch (ExecutionException e) {
+//////                e.printStackTrace();
+//////            }
+////        }
+////		facebookAPIManager.placeOpponentRequests(requestIdsList);
+////        CharSequence[] opponents = new CharSequence[availableGames.size()];
+////	    for (int i = 0; i < availableGames.size(); i++) {
+////	        Game curGame = availableGames.get(availableGames.keyAt(i));
+////	    	// TODO: Clean up this logic!!
+////	        if (curGame.lastMove.equals("X")) {
+////	            opponents[i] = curGame.player1.playerName;
+////            } else if (curGame.lastMove.equals("O")) {
+////	            opponents[i] = curGame.player2.playerName;
+////            }
+////        }
+////        new AlertDialog.Builder(this)
+////                .setTitle("Choose an Opponent")
+////                .setItems(opponents, new DialogInterface.OnClickListener() {
+////                    public void onClick(DialogInterface dialog, int i) {
+////                        // The 'which' argument contains the index position
+////                        // of the selected item
+////                        Intent board = new Intent(context, Board.class);
+////                        board.putExtra("Level", Integer.parseInt(curGame.data[9][3]));
+////                        board.putExtra("Player 1 Name", curGame.player1.playerName);
+////                        board.putExtra("Player 2 Name", curGame.player2.playerName);
+////                        if (curGame.lastMove.equals("X")) {
+////                            board.putExtra("Pending Player", curGame.player1.playerFBID);
+////                            board.putExtra("Current Player", curGame.player2.playerFBID);
+////                        } else {
+////                            board.putExtra("Pending Player", curGame.player2.playerFBID);
+////                            board.putExtra("Current Player", curGame.player1.playerFBID);
+////                        }
+////                        board.putExtra("Caller", "Index");
+////                        board.putExtra("My Turn", true);
+////                        board.putExtra("Finished", false);
+////                        board.putExtra("Multiplayer", true);
+////                        board.putExtra("GameRequestID", curGame.requestID);
+////                        index.finish();
+////                        startActivity(board);
+////                    }
+////                })
+////                .create()
+////                .show();
+//    }
 
 	private String getPlayer(byte [] game, int player) {
         String gameArray = new String(game);
@@ -391,7 +409,7 @@ GoogleApiClient.OnConnectionFailedListener, OnInvitationReceivedListener, OnTurn
 			opponentMove.setText(turn);
 			opponentMove.setEnabled(false);
 			
-			bp = new ButtonPressed(context, level, availableGames.get(availableGames.keySet().toArray()[0]), board);
+			bp = new ButtonPressed(context, level, availableGames.get(availableGames.keyAt(0)), board);
 			
 			if( level >= 2) {
 				bp.boardChanger(row, column, level, true);
@@ -575,6 +593,83 @@ GoogleApiClient.OnConnectionFailedListener, OnInvitationReceivedListener, OnTurn
 		}
 		level = Integer.parseInt(board[rows.length - 1][5]);
 		return level;
+	}
+
+	@Override
+	public void onSuccessMeRequest() {
+		// Not required here
+	}
+
+	@Override
+	public void onSuccessMyFriendsRequest() {
+		// Not required here
+	}
+
+	@Override
+	public void onSuccessOpponentRequest(LongSparseArray<Game> availableGames) {
+		this.availableGames = availableGames;
+
+		// TODO: Deal with the repeating code
+		if (availableGames.size() == 1) {
+			Game curGame = availableGames.get(availableGames.keyAt(0));
+			Intent board = new Intent(getApplicationContext(), Board.class);
+			board.putExtra("Level", Integer.parseInt(curGame.data[9][3]));
+			board.putExtra("Player 1 Name", curGame.player1.playerName);
+			board.putExtra("Player 2 Name", curGame.player2.playerName);
+			// TODO: Clean up this logic!!
+			if (curGame.lastMove.equals("X")) {
+				board.putExtra("Pending Player", curGame.player1.playerFBID);
+				board.putExtra("Current Player", curGame.player2.playerFBID);
+			} else {
+				board.putExtra("Pending Player", curGame.player2.playerFBID);
+				board.putExtra("Current Player", curGame.player1.playerFBID);
+			}
+			board.putExtra("Caller", "Index");
+			board.putExtra("My Turn", true);
+			board.putExtra("Finished", false);
+			board.putExtra("Multiplayer", true);
+			board.putExtra("GameRequestID", Long.parseLong(requestIdsList[0]));
+			startActivity(board);
+		} else {
+			CharSequence[] opponents = new CharSequence[availableGames.size()];
+			for (int i = 0; i < availableGames.size(); i++) {
+				Game curGame = availableGames.get(availableGames.keyAt(i));
+				// TODO: Clean up this logic!!
+				if (curGame.lastMove.equals("X")) {
+					opponents[i] = curGame.player1.playerName;
+				} else if (curGame.lastMove.equals("O")) {
+					opponents[i] = curGame.player2.playerName;
+				}
+			}
+			new AlertDialog.Builder(this)
+					.setTitle("Choose an Opponent")
+					.setItems(opponents, new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int i) {
+							Game curGame = Index.availableGames.get(Index.availableGames.keyAt(0));
+							Intent board = new Intent(context, Board.class);
+							board.putExtra("Level", Integer.parseInt(curGame.data[9][3]));
+							board.putExtra("Player 1 Name", curGame.player1.playerName);
+							board.putExtra("Player 2 Name", curGame.player2.playerName);
+							// TODO: Clean up this logic!!
+							if (curGame.lastMove.equals("X")) {
+								board.putExtra("Pending Player", curGame.player1.playerFBID);
+								board.putExtra("Current Player", curGame.player2.playerFBID);
+							} else {
+								board.putExtra("Pending Player", curGame.player2.playerFBID);
+								board.putExtra("Current Player", curGame.player1.playerFBID);
+							}
+							board.putExtra("Caller", "Index");
+							board.putExtra("My Turn", true);
+							board.putExtra("Finished", false);
+							board.putExtra("Multiplayer", true);
+							board.putExtra("GameRequestID", curGame.requestID);
+							index.finish();
+							startActivity(board);
+						}
+					})
+					.create()
+					.show();
+		}
 	}
 }
 

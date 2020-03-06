@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import androidx.fragment.app.Fragment;
 import android.util.Log;
+import android.util.LongSparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,12 +17,13 @@ import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
+import com.varunbatta.titanictictactoe.facebookAPI.FacebookAPIListener;
+import com.varunbatta.titanictictactoe.facebookAPI.FacebookAPIManager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 
 public class FacebookGameSelected extends Fragment implements FacebookAPIListener {
 
@@ -39,7 +41,7 @@ public class FacebookGameSelected extends Fragment implements FacebookAPIListene
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Initiate facebookAPIManager
-        facebookAPIManager = FacebookAPIManager.getInstance(this.getContext(), this);
+        facebookAPIManager = FacebookAPIManager.getInstance(this.getContext());
 
         // Inflate the layout for this fragment
         layout =  inflater.inflate(R.layout.facebook_game_selected, container, false);
@@ -86,12 +88,12 @@ public class FacebookGameSelected extends Fragment implements FacebookAPIListene
             // Get Player 1 Information
             GameRequest player1Request = new GameRequest();
             player1Request.createNewGameRequest("/me", playerParameters, null);
-            facebookAPIManager.placeMeRequest(player1Request);
+            facebookAPIManager.placeMeRequest(player1Request, this);
 
             // Get Player 1 Friends
             GameRequest player1FriendsRequest = new GameRequest();
             player1FriendsRequest.createNewGameRequest("/me/friends", playerParameters, null);
-            facebookAPIManager.placeMyFriendsRequest(player1FriendsRequest);
+            facebookAPIManager.placeMyFriendsRequest(player1FriendsRequest, this);
         }
 
         return layout;
@@ -136,5 +138,10 @@ public class FacebookGameSelected extends Fragment implements FacebookAPIListene
         }
 
         friendSelector.invalidate();
+    }
+
+    @Override
+    public void onSuccessOpponentRequest(LongSparseArray<Game> availableGames) {
+        // Nothing needs to be done here
     }
 }

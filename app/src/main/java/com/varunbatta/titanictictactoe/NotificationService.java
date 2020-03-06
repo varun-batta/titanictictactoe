@@ -168,7 +168,7 @@ OnConnectionFailedListener {
             opponentMove.setText(turn);
             opponentMove.setEnabled(false);
 
-            ButtonPressed bp = new ButtonPressed(context, level, Index.availableGames.get(Index.availableGames.keySet().toArray()[0]), board);
+            ButtonPressed bp = new ButtonPressed(context, level, Index.availableGames.get(Index.availableGames.keyAt(0)), board);
 
             if (level >= 2) {
                 bp.boardChanger(row, column, level, true);
