@@ -355,7 +355,7 @@ public class ButtonPressed implements OnClickListener {
 			value2 = winChecker[rowIndex][columnIndex];
 		}
 
-		// Seeing if all the cells in the row have the same value
+		// Seeing if all the cells in the column have the same value
 		if(value != null && value1 != null && value2 != null && value.equals(value1) && value1.equals(value2)) {
 			x = turnValue.equals("") ? turn : turnValue;
 		}
