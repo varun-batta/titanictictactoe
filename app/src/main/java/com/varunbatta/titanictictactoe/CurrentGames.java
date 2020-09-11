@@ -57,8 +57,6 @@ public class CurrentGames extends Activity implements ConnectionCallbacks, OnCon
 	public static boolean currentGamesVisible;
 	
 	Context context;
-//	String [][] playerNamesAndMatchIds;
-//	TurnBasedMatch [] matches;
     static Map<Long, Game> currentGames;
 	LinearLayout currentGamesLayout;
 	private int currentGameIndex = 1;
@@ -91,7 +89,7 @@ public class CurrentGames extends Activity implements ConnectionCallbacks, OnCon
 
 //		currentGamesScrollView = findViewById(R.id.currentGamesScrollView);
 //		currentGamesScrollView.setBackgroundColor(Color.rgb(0, 173, 173));
-		
+
 		progressBarHolder = findViewById(R.id.currentGamesProgressBarHolder);
 //		progressBarHolder.setBackgroundColor(Color.rgb(0, 173, 173));
 		
@@ -125,7 +123,6 @@ public class CurrentGames extends Activity implements ConnectionCallbacks, OnCon
 		
 //		client.connect();
 		currentGamesVisible = true;
-//		Log.d("Done", "Done");
 	}
 
 	@Override
@@ -163,6 +160,8 @@ public class CurrentGames extends Activity implements ConnectionCallbacks, OnCon
 		currentGamesVisible = false;
 	}
 
+
+	// TODO: Get rid of the spinner once done
 	private void prepareSavedGamesButtons() {
         Button savedGamesButton = findViewById(R.id.savedGamesButton);
         if (GoogleSignIn.getLastSignedInAccount(this) == null) {
@@ -186,6 +185,7 @@ public class CurrentGames extends Activity implements ConnectionCallbacks, OnCon
         });
 	}
 
+	// TODO: Fix UI as well as the way this is all handled
 	private void prepareCurrentGamesButtons() {
         try {
             Map<String, String> parameters = new HashMap<String, String>();
@@ -247,208 +247,13 @@ public class CurrentGames extends Activity implements ConnectionCallbacks, OnCon
         currentGamesLayout.invalidate();
     }
 
-//	@Override
-//	public void onResult(LoadMatchesResult matches) {
-//		Log.d("Result Received", "RR");
-//		LoadMatchesResponse currentGames = matches.getMatches();
-//		TurnBasedMatchBuffer myTurns = currentGames.getMyTurnMatches();
-//		TurnBasedMatchBuffer theirTurns = currentGames.getTheirTurnMatches();
-//		TurnBasedMatchBuffer finishedGames = currentGames.getCompletedMatches();
-////		getOpponentNamesAndMatchIds(myTurns, theirTurns, finishedGames);
-//	}
-
-//	private void getOpponentNamesAndMatchIds(TurnBasedMatchBuffer myTurns,
-//			TurnBasedMatchBuffer theirTurns, TurnBasedMatchBuffer finishedGames) {
-//		int myTurnsCount = myTurns.getCount();
-//		int theirTurnsCount = theirTurns.getCount();
-//		int finishedGamesCount = finishedGames.getCount();
-//		playerNamesAndMatchIds = new String[myTurnsCount + theirTurnsCount + finishedGamesCount][3];
-//		matches = new TurnBasedMatch[myTurnsCount + theirTurnsCount + finishedGamesCount];
-//
-//		Log.d("mTC", "" + myTurnsCount);
-//		Log.d("tTC", "" + theirTurnsCount);
-//		Log.d("fTC", "" + finishedGamesCount);
-//
-//		for(int i = 0; i < myTurnsCount; i++) {
-//			TurnBasedMatch match = myTurns.get(i);
-//			String matchId = match.getMatchId();
-//			if(matchId != null) {
-//				putPlayerNames(match, i);
-//				playerNamesAndMatchIds[i][2] = match.getMatchId();
-//				matches[i] = match;
-//				int level = -1;
-//				if(match.getData() != null) {
-//					level = getLevel(match.getData());
-//				}
-//				Button potentialGameButton = new Button(context);
-//				potentialGameButton.setText("Your Turn against " + playerNamesAndMatchIds[i][1] + " - Level " + level);
-//				Log.d("mTTag", i + " " + playerNamesAndMatchIds[i][2]);
-//				potentialGameButton.setTag(playerNamesAndMatchIds[i][2]);
-//				potentialGameButton.setOnClickListener(new View.OnClickListener() {
-//
-//					@Override
-//					public void onClick(final View v) {
-//						Log.d("Clicked", "mT");
-//						gameOptions = new String [2];
-//						gameOptions[0] = "Play Game";
-//						gameOptions[1] = "Forfeit";
-//						AlertDialog.Builder builder = new AlertDialog.Builder(CurrentGames.this);
-//						builder.setTitle("Game Options")
-//						.setItems(gameOptions, new DialogInterface.OnClickListener() {
-//							public void onClick(DialogInterface dialog, int which) {
-//								Button selectedGame = (Button) v;
-//								String matchId = (String) selectedGame.getTag();
-//								boolean cancelled = selectedGame.getText().toString().equals("Cancelled");
-//								dialogListener(gameOptions[which], matchId, false, cancelled, selectedGame);
-//							}
-//						});
-//					    AlertDialog dialog = builder.create();
-//					    dialog.show();
-//	//					Button selectedGame = (Button) v;
-//	//					String matchId = (String) selectedGame.getTag();
-//	//					prepareBoardForGame(matchId, false, false);
-//					}
-//				});
-//
-//				currentGamesLayout.addView(potentialGameButton);
-//				potentialGameButton.invalidate();
-//			} else {
-//				Games.TurnBasedMultiplayer.dismissMatch(client, matchId);
-//				myTurnsCount--;
-//			}
-////			Log.d("pGB", "Your Turn");
-////			Toast.makeText(context, "Your Turn", Toast.LENGTH_SHORT).show();
-//		}
-//
-//		for(int i = 0; i < theirTurnsCount; i++) {
-//			TurnBasedMatch match = theirTurns.get(i);
-//			String matchId = match.getMatchId();
-//			if(matchId != null) {
-//				int index = i + myTurnsCount;
-//				putPlayerNames(match, index);
-//				playerNamesAndMatchIds[index][2] = matchId;
-//				matches[index] = match;
-//				Button potentialGameButton = new Button(context);
-//				potentialGameButton.setText(playerNamesAndMatchIds[index][1] + "'s turn - Level " + getLevel(match.getData()));
-//				Log.d("tTTag", index + " " + playerNamesAndMatchIds[index][2]);
-//				potentialGameButton.setTag(playerNamesAndMatchIds[index][2]);
-//				potentialGameButton.setOnClickListener(new View.OnClickListener() {
-//
-//					@Override
-//					public void onClick(final View v) {
-//						Log.d("Clicked", "tT");
-//						gameOptions = new String [1];
-//						gameOptions[0] = "View Game";
-//						AlertDialog.Builder builder = new AlertDialog.Builder(CurrentGames.this);
-//						builder.setTitle("Game Options")
-//						.setItems(gameOptions, new DialogInterface.OnClickListener() {
-//							public void onClick(DialogInterface dialog, int which) {
-//								Button selectedGame = (Button) v;
-//								String matchId = (String) selectedGame.getTag();
-//								boolean cancelled = selectedGame.getText().toString().equals("Cancelled");
-//								dialogListener(gameOptions[which], matchId, false, cancelled, selectedGame);
-//							}
-//						});
-//					    AlertDialog dialog = builder.create();
-//					    dialog.show();
-//	//					Button selectedGame = (Button) v;
-//	//					String matchId = (String) selectedGame.getTag();
-//	//					prepareBoardForGame(matchId, false, false);
-//					}
-//				});
-//
-//				currentGamesLayout.addView(potentialGameButton);
-//				potentialGameButton.invalidate();
-//			} else {
-//				Games.TurnBasedMultiplayer.dismissMatch(client, matchId);
-//				theirTurnsCount--;
-//			}
-////			Log.d("pGB", "Their Turn");
-////			Toast.makeText(context, "Their Turn", Toast.LENGTH_SHORT).show();
-//		}
-//
-//		for(int i = 0; i < finishedGamesCount; i++) {
-//			TurnBasedMatch match = finishedGames.get(i);
-//			String matchId = match.getMatchId();
-//			if(matchId != null) {
-//				int index = i + myTurnsCount + theirTurnsCount;
-//				putPlayerNames(match, index);
-//				playerNamesAndMatchIds[index][2] = matchId;
-//				matches[index] = match;
-//				String currentPlayerId = Games.Players.getCurrentPlayerId(client);
-//				Log.d("cPID", currentPlayerId);
-//				String currentParticipantId = match.getParticipantId(Games.Players.getCurrentPlayerId(client));
-//				Log.d("cPaID", currentParticipantId);
-////				ParticipantResult winning = new ParticipantResult(currentParticipantId, ParticipantResult.MATCH_RESULT_WIN, ParticipantResult.PLACING_UNINITIALIZED);
-////				ParticipantResult losing = new ParticipantResult(currentParticipantId, ParticipantResult.MATCH_RESULT_LOSS, ParticipantResult.PLACING_UNINITIALIZED);
-////				ParticipantResult tie = new ParticipantResult(currentParticipantId, ParticipantResult.MATCH_RESULT_TIE, ParticipantResult.PLACING_UNINITIALIZED);
-//				Button finishedGameButton = new Button(context);
-////				Log.d("Result", "" + match.getParticipant(currentParticipantId).getResult().getResult());
-//				if(match.getStatus() == TurnBasedMatch.MATCH_STATUS_CANCELED) {
-//					finishedGameButton.setText("Cancelled");
-//				} else if ( match.getParticipant(currentParticipantId).getResult().getResult() == ParticipantResult.MATCH_RESULT_WIN ) {
-//					finishedGameButton.setText("Winner - " + match.getParticipant(currentParticipantId).getDisplayName());
-//				} else if ( match.getParticipant(currentParticipantId).getResult().getResult() == ParticipantResult.MATCH_RESULT_LOSS ) {
-//					finishedGameButton.setText("Winner - " + match.getParticipant(getPendingParticipantId(match)).getDisplayName());
-//				} else if ( match.getParticipant(currentParticipantId).getResult().getResult() == ParticipantResult.MATCH_RESULT_TIE ) {
-//					finishedGameButton.setText("Tie between " + match.getParticipant(currentParticipantId).getDisplayName() + " & " + match.getParticipant(getPendingParticipantId(match)).getDisplayName());
-//				} else {
-//					finishedGameButton.setText("Sorry, Unknown Data");
-//				}
-//				Log.d("fGTag", index + " " + playerNamesAndMatchIds[index][2]);
-//				finishedGameButton.setTag(playerNamesAndMatchIds[index][2]);
-//				finishedGameButton.setOnClickListener(new View.OnClickListener() {
-//
-//					@Override
-//					public void onClick(final View v) {
-//						gameOptions = new String [3];
-//						gameOptions[0] = "View Game";
-//						gameOptions[1] = "Remove";
-//						gameOptions[2] = "Rematch!";
-//						AlertDialog.Builder builder = new AlertDialog.Builder(CurrentGames.this);
-//						builder.setTitle("Game Options")
-//						.setItems(gameOptions, new DialogInterface.OnClickListener() {
-//							public void onClick(DialogInterface dialog, int which) {
-//								Button selectedGame = (Button) v;
-//								String matchId = (String) selectedGame.getTag();
-//								boolean cancelled = selectedGame.getText().toString().equals("Cancelled");
-//								dialogListener(gameOptions[which], matchId, true, cancelled, selectedGame);
-//							}
-//						});
-//					    AlertDialog dialog = builder.create();
-//					    dialog.show();
-//	//					Button selectedGame = (Button) v;
-//	//					String matchId = (String) selectedGame.getTag();
-//	//					boolean cancelled = selectedGame.getText().toString().equals("Cancelled");
-//	//					prepareBoardForGame(matchId, false, cancelled);
-//					}
-//				});
-//				currentGamesLayout.addView(finishedGameButton);
-//				finishedGameButton.invalidate();
-//			} else {
-//				Games.TurnBasedMultiplayer.dismissMatch(client, matchId);
-//				finishedGamesCount--;
-//			}
-//		}
-//
-//		if(myTurnsCount == 0 && theirTurnsCount == 0 && finishedGamesCount == 0) {
-//			TextView none = new TextView(context);
-//			none.setText("None!");
-//			none.setTextSize(30);
-//			none.setTextColor(Color.BLACK);
-//			none.setGravity(Gravity.CENTER);
-//			currentGamesLayout.addView(none);
-//			none.invalidate();
-//		}
-//
-//	}
-	
+    // Handles the choice made by user when selecting an action on the dialog
 	private void dialogListener(String option, final long requestID, final Button selectedButton) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(CurrentGames.this);
 	    AlertDialog dialog;
-		switch(option) {
+		// TODO: Might want to change these options to an enum or something
+	    switch(option) {
 		case "Play Game":
-			Log.d("PGC", "Play Game Called");
 			Index.receiving = true;
             Intent board = new Intent(getApplicationContext(), Board.class);
             board.putExtra("Level", currentGames.get(requestID).level);
@@ -467,10 +272,8 @@ public class CurrentGames extends Activity implements ConnectionCallbacks, OnCon
             board.putExtra("Multiplayer", true);
             board.putExtra("GameRequestID", requestID);
             startActivity(board);
-//			prepareBoardForGame(matchId, finished, cancelled);
 			break;
 		case "View Game":
-//			prepareBoardForGame(matchId, finished, cancelled);
             board = new Intent(getApplicationContext(), Board.class);
             board.putExtra("Level", currentGames.get(requestID).level);
             board.putExtra("Player 1 Name", currentGames.get(requestID).player1.playerName);
@@ -509,44 +312,6 @@ public class CurrentGames extends Activity implements ConnectionCallbacks, OnCon
 		    dialog = builder.create();
 		    dialog.show();
 			break;
-//		case "Remove":
-//			builder.setTitle("Remove?")
-//				.setMessage("Are you sure you want to remove this game?")
-//				.setPositiveButton("Remove", new DialogInterface.OnClickListener() {
-//
-//					@Override
-//					public void onClick(DialogInterface dialog, int which) {
-//						Games.TurnBasedMultiplayer.dismissMatch(client, matchId);
-//						currentGamesLayout.removeView(selectedButton);
-//						currentGamesLayout.invalidate();
-//					}
-//				})
-//				.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-//
-//					@Override
-//					public void onClick(DialogInterface dialog, int which) {
-//						dialog.cancel();
-//					}
-//				});
-//			dialog = builder.create();
-//		    dialog.show();
-//			break;
-//		case "Rematch!":
-//			Winner winner = new Winner();
-//			int index = -1;
-//			for(int i = 0; i < playerNamesAndMatchIds.length; i++) {
-//				if(playerNamesAndMatchIds[i][2].equals(matchId)) {
-//					index = i;
-//					break;
-//				}
-//			}
-////			TurnBasedMatch match = matches[index];
-//			if(match.canRematch()) {
-//				PendingResult<InitiateMatchResult> rematch = Games.TurnBasedMultiplayer.rematch(client, matchId);
-//				rematch.setResultCallback(winner);
-//			} else {
-//				Toast.makeText(context, "Sorry, cannot rematch", Toast.LENGTH_SHORT).show();
-//			}
 		}
 	}
 
@@ -577,26 +342,7 @@ public class CurrentGames extends Activity implements ConnectionCallbacks, OnCon
 
         GameRequestDialog forfeitDialog = new GameRequestDialog(this);
         forfeitDialog.show(requestContent.build());
-//		int index = -1;
-//		for(int i = 0; i < playerNamesAndMatchIds.length; i++) {
-//			if(playerNamesAndMatchIds[i][2].equals(matchId)) {
-//				index = i;
-//				break;
-//			}
-//		}
-//		TurnBasedMatch match = matches[index];
-		
-//		ParticipantResult currentPlayer;
-//		ParticipantResult pendingPlayer;
-//		currentPlayer = new ParticipantResult(match.getParticipantId(Games.Players.getCurrentPlayerId(client)), ParticipantResult.MATCH_RESULT_LOSS, ParticipantResult.PLACING_UNINITIALIZED);
-//		pendingPlayer = new ParticipantResult(getPendingParticipantId(match), ParticipantResult.MATCH_RESULT_WIN, ParticipantResult.PLACING_UNINITIALIZED);
-//		List<ParticipantResult> results = new ArrayList<ParticipantResult>();
-//		results.add(currentPlayer);
-//		results.add(pendingPlayer);
-//		GoogleApiClient client = Index.client;
-//		Games.TurnBasedMultiplayer.finishMatch(client, matchId, match.getData(), results);
-//		ButtonPressed.currentTurn = "";
-//		Games.TurnBasedMultiplayer.dismissMatch(client, matchId);
+
         GameRequest deleteRequest = new GameRequest();
         deleteRequest.createNewGameRequest("/" + requestID, null, HttpMethod.DELETE);
         new GraphRequests().execute(deleteRequest);
@@ -622,95 +368,8 @@ public class CurrentGames extends Activity implements ConnectionCallbacks, OnCon
         return game.toString();
     }
 
-//	private void putPlayerNames(TurnBasedMatch match, int row) {
-//		ArrayList<String> participantIds = match.getParticipantIds();
-//		String pendingParticipantId = "";
-//		String currentParticipantId = match.getParticipantId(Games.Players.getCurrentPlayerId(client));
-//		if( currentParticipantId.equals( participantIds.get(0) ) ) {
-//			pendingParticipantId = participantIds.get(1);
-//		}
-//		if( currentParticipantId.equals( participantIds.get(1) ) ) {
-//			pendingParticipantId = participantIds.get(0);
-//		}
-//		playerNamesAndMatchIds[row][0] = match.getParticipant(currentParticipantId).getDisplayName();
-//		playerNamesAndMatchIds[row][1] = match.getParticipant(pendingParticipantId).getDisplayName();
-//	}
-	
-//	private void prepareBoardForGame(String matchId, boolean finished, boolean cancelled) {
-//		Log.d("pBFG", "Called");
-//		Log.d("MatchId", matchId);
-//		Log.d("Length", "" + playerNamesAndMatchIds.length);
-//		int index = -1;
-//		for(int i = 0; i < playerNamesAndMatchIds.length; i++) {
-//			Log.d("ArrayMatchId", i + " " + playerNamesAndMatchIds[i][2]);
-//			if(playerNamesAndMatchIds[i][2].equals(matchId)) {
-//				index = i;
-//				break;
-//			}
-//		}
-//		TurnBasedMatch match = matches[index];
-//		Log.d("Match", match.toString());
-//		byte[] gameData = match.getData();
-//		String pendingParticipantId = getPendingParticipantId(match);
-//		int level = getLevel(gameData);
-//		Log.d("Level", "" + level);
-//		int status = match.getTurnStatus();
-//		Log.d("Status", "" + status);
-//		boolean myTurn = false;
-		
-//		if(status == TurnBasedMatch.MATCH_TURN_STATUS_MY_TURN) {
-//			myTurn = true;
-//		}
-		
-//		Log.d("mT", "" + myTurn);
-		
-//		Intent board = new Intent(this, Board.class);
-//		board.putExtra("Level", level);
-//		board.putExtra("On Going Match", gameData);
-//		board.putExtra("Match ID", matchId);
-//		board.putExtra("Pending Player", pendingParticipantId);
-//		board.putExtra("Current Player", match.getParticipantId(Games.Players.getCurrentPlayerId(client)));
-//		board.putExtra("Caller", "CurrentGames");
-//		board.putExtra("My Turn", myTurn);
-//		board.putExtra("Finished", finished);
-//		board.putExtra("Can Rematch", match.canRematch());
-//		board.putExtra("Multiplayer", true);
-//		startActivity(board);
-		
-//		if(cancelled) {
-//			Log.d("lM", "Leaving Match");
-//			Games.TurnBasedMultiplayer.dismissMatch(client, matchId);
-//		}
-//	}
-	
-//	private String getPendingParticipantId(TurnBasedMatch match) {
-//		ArrayList<String> participantIds = match.getParticipantIds();
-//		String pendingParticipantId = "";
-//		String currentParticipantId = match.getParticipantId(Games.Players.getCurrentPlayerId(client));
-//		if( currentParticipantId.equals( participantIds.get(0) ) ) {
-//			pendingParticipantId = participantIds.get(1);
-//		}
-//		if( currentParticipantId.equals( participantIds.get(1) ) ) {
-//			pendingParticipantId = participantIds.get(0);
-//		}
-//		return pendingParticipantId;
-//	}
-	
-//	private int getLevel(byte[] game) {
-//		int level = 0;
-//		String gameArray = new String(game);
-//		String [] rows = gameArray.split(";");
-//		String [][] board = new String [rows.length][];
-//		for(int i = 0; i < rows.length; i++) {
-//			board[i] = rows[i].split(",");
-//		}
-//		level = Integer.parseInt(board[9][5]);
-//		return level;
-//	}
-
 	@Override
 	public void onConnectionFailed(ConnectionResult result) {
-		Log.d("CF", "Connection Failed");
 		if (resolvingError) {
             // Already attempting to resolve an error.
             return;
@@ -723,7 +382,7 @@ public class CurrentGames extends Activity implements ConnectionCallbacks, OnCon
                 client.connect();
             }
         } else {
-            // Show dialog using GooglePlayServicesUtil.getErrorDialog()
+            // TODO: Show error dialog (using GooglePlayServicesUtil.getErrorDialog()?)
 //            showErrorDialog(result.getErrorCode());
             resolvingError = true;
         }
@@ -731,49 +390,15 @@ public class CurrentGames extends Activity implements ConnectionCallbacks, OnCon
 
 	@Override
 	public void onConnected(Bundle connectionResult) {
+	    // TODO: Are these logs necessary or can we just leave this blank?
 		Log.d("OCCG", "Connected CurrentGames");
-//		AsyncTask<Void, Void, Boolean> updateTask = new AsyncTask<Void, Void, Boolean>() {
-//
-//    		@Override
-//            protected void onPreExecute() {
-//                super.onPreExecute();
-////                button.setEnabled(false);
-//                inAnimation = new AlphaAnimation(0f, 1f);
-//                inAnimation.setDuration(200);
-//                progressBarHolder.setAnimation(inAnimation);
-//                progressBarHolder.setVisibility(View.VISIBLE);
-//    		}
-//
-//    		@Override
-//            protected Boolean doInBackground(Void... params) {
-////    			int [] statuses = {TurnBasedMatch.MATCH_TURN_STATUS_MY_TURN, TurnBasedMatch.MATCH_TURN_STATUS_THEIR_TURN,
-////    					TurnBasedMatch.MATCH_TURN_STATUS_COMPLETE};
-////    			PendingResult<LoadMatchesResult> activeGames = Games.TurnBasedMultiplayer.loadMatchesByStatus(client, statuses);
-////    			setResultCallback(activeGames);
-//    			return true;
-//            }
-//
-//			@Override
-//            protected void onPostExecute(Boolean result) {
-//                super.onPostExecute(result);
-//                outAnimation = new AlphaAnimation(1f, 0f);
-//                outAnimation.setDuration(200);
-//                progressBarHolder.setAnimation(outAnimation);
-//                progressBarHolder.setVisibility(View.GONE);
-//            }
-//        };
-//        updateTask.execute();
 	}
 
 	@Override
 	public void onConnectionSuspended(int result) {
+	    // TODO: Should we do anything else like let the user know?
 		Log.d("CS", "Connection Suspended");
 	}
-	
-//    private void setResultCallback(
-//			PendingResult<LoadMatchesResult> activeGames) {
-//		activeGames.setResultCallback(this);
-//	}
     
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
@@ -785,7 +410,7 @@ public class CurrentGames extends Activity implements ConnectionCallbacks, OnCon
 		return super.onKeyDown(keyCode, event);
     }
 	
-//	@Override
+    // TODO: Document this code and refactor as necessary
 	protected void onActivityResult(int requestCode, int resultCode,
 	                                Intent intent) {
 	    super.onActivityResult(requestCode, resultCode, intent);
@@ -803,15 +428,12 @@ public class CurrentGames extends Activity implements ConnectionCallbacks, OnCon
                         .setNeutralButton(android.R.string.ok, null).show();
             }
         }
-	    Log.d("oAR", "onActivityResult");
 		if (intent != null) {
 	        if (intent.hasExtra(Snapshots.EXTRA_SNAPSHOT_METADATA)) {
-	            Log.d("LG", "Load Game");
 	        	// Load a snapshot.
 	            SnapshotMetadata snapshotMetadata = (SnapshotMetadata)
 	                    intent.getParcelableExtra(Snapshots.EXTRA_SNAPSHOT_METADATA);
 	            final String snapshotNm = snapshotMetadata.getUniqueName();
-	            Log.d("snapshotNm", snapshotNm);
 
 	            AsyncTask<Void, Void, Integer> task = new AsyncTask<Void, Void, Integer>() {
 	                @Override
@@ -862,7 +484,6 @@ public class CurrentGames extends Activity implements ConnectionCallbacks, OnCon
 	        } else if (intent.hasExtra(Snapshots.EXTRA_SNAPSHOT_NEW)) {
 	            // Create a new snapshot named with a unique string
 	        	final String snapshotNm = Board.game.player1.playerName + "-" + Board.game.player2.playerName + "-" + "Level" + Board.level;
-	        	Log.d("snapshotNm", snapshotNm);
 
 	        	AsyncTask<Void, Void, Boolean> updateTask = new AsyncTask<Void, Void, Boolean>() {
 	                @Override
@@ -892,25 +513,11 @@ public class CurrentGames extends Activity implements ConnectionCallbacks, OnCon
 	                }
 	            };
 	            updateTask.execute();
-	            Log.d("Executed", "Saved");
 	        }
 	    }
 	}
 
-    private void handleSignInResult(Task<GoogleSignInAccount> completedTask) {
-        try {
-            GoogleSignInAccount account = completedTask.getResult(ApiException.class);
-//
-//            // Signed in successfully, show authenticated UI.
-//            updateUI(account);
-        } catch (ApiException e) {
-            // The ApiException status code indicates the detailed failure reason.
-            // Please refer to the GoogleSignInStatusCodes class reference for more information.
-            Log.w("SIF", "signInResult:failed code=" + e.getStatusCode());
-//            updateUI(null);
-        }
-    }
-
+    // TODO: Can this be a global function?
 	private byte[] wincheckerToByteArray(String[][] wincheck) {
         StringBuilder game = new StringBuilder();
         for (int i = 0; i < 9; i++) {
