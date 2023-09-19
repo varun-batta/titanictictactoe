@@ -1,0 +1,116 @@
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorGreen">
+
+    <TextView
+        android:id="@+id/welcomeTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/welcome"
+        android:textColor="@color/colorBlack"
+        android:gravity="center_horizontal"
+        android:textSize="30sp"
+        android:layout_marginBottom="20dp"
+        android:layout_marginTop="50dp"
+        android:layout_alignParentTop="true" />
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:src="@drawable/titanic_tic_tac_toe_logo"
+        android:layout_below="@id/welcomeTitle" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_alignParentBottom="true">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/mainMenuTitle"
+            android:textColor="@color/colorBlack"
+            android:textSize="20sp"
+            android:layout_marginBottom="15dp"
+            android:gravity="center_horizontal" />
+
+        <Button
+            android:id="@+id/instructionsButton"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginBottom="10dp"
+            android:background="@color/colorBlack"
+            android:text="@string/instructionsButtonText"
+            android:textColor="@color/colorWhite"
+            android:textAllCaps="false" />
+
+        <Button
+            android:id="@+id/level1Button"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginBottom="10dp"
+            android:background="@color/colorBlack"
+            android:text="@string/level1ButtonText"
+            android:textColor="@color/colorWhite"
+            android:textAllCaps="false" />
+
+        <Button
+            android:id="@+id/level2Button"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginBottom="10dp"
+            android:background="@color/colorBlack"
+            android:text="@string/level2ButtonText"
+            android:textColor="@color/colorWhite"
+            android:textAllCaps="false" />
+
+        <Button
+            android:id="@+id/level3Button"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginBottom="10dp"
+            android:background="@color/colorBlack"
+            android:text="@string/level3ButtonText"
+            android:textColor="@color/colorWhite"
+            android:textAllCaps="false" />
+
+        <Button
+            android:id="@+id/level4Button"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginBottom="10dp"
+            android:background="@color/colorBlack"
+            android:text="@string/level4ButtonText"
+            android:textColor="@color/colorWhite"
+            android:textAllCaps="false" />
+
+        <Button
+            android:id="@+id/currentGamesButton"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginBottom="10dp"
+            android:background="@color/colorBlack"
+            android:text="@string/savedGamesButtonText"
+            android:textColor="@color/colorWhite"
+            android:textAllCaps="false" />
+
+    </LinearLayout>
+
+</RelativeLayout>

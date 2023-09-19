@@ -1,0 +1,70 @@
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:id="@+id/winnerLayout"
+    android:background="@color/colorGreen">
+
+    <TextView
+        android:id="@+id/congrats"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:gravity="center_horizontal"
+        android:textColor="@color/colorBlack"
+        android:textSize="50sp" />
+
+    <LinearLayout
+        android:id="@+id/bottomPanel"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/congrats"
+        android:layout_margin="30dp"
+        android:layout_centerHorizontal="true">
+
+        <Button
+            android:id="@+id/rematch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:padding="8dp"
+            android:text="@string/rematchButton"
+            android:textColor="@color/colorWhite"
+            android:textSize="30sp"
+            android:textAllCaps="false"
+            android:background="@color/colorBlack" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/mainMenu"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/mainMenuButton"
+                android:textColor="@color/colorWhite"
+                android:textAllCaps="false"
+                android:background="@color/colorBlack"
+                android:layout_marginRight="8dp" />
+
+            <Button
+                android:id="@+id/viewGame"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/viewGameButton"
+                android:textColor="@color/colorWhite"
+                android:textAllCaps="false"
+                android:background="@color/colorBlack"
+                android:layout_marginLeft="8dp" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</RelativeLayout>

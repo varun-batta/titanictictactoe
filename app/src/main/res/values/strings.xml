@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Administrative Details -->
+    <string name="app_name">Titanic Tic Tac Toe</string>
+    <string name="app_id">15248927065</string>
+    <string name="facebook_app_id">267430880368292</string>
+    <string name="fb_login_protocol_scheme">fb267430880368292</string>
+    <!-- Launch Screen -->
+    <string name="tic">Tic</string>
+    <string name="tac">Tac</string>
+    <string name="toe">Toe</string>
+    <string name="guide">Tic-Tac-Toe to the next level. Enjoy!</string>
+    <string name="playButtonText">Play</string>
+    <!-- Instructions -->
+    <string name="level1Title">Level 1 - Normal Tic Tac Toe</string>
+    <string name="level1Explanation">This is basically like normal Tic Tac Toe, a simple 3x3 grid in which you alternatively play X or O until one of the players gets 3 of their symbol in a row, column, or diagonal, leading to victory for that player. The opponent will logically try to block the player from attaining this goal while trying to attain it themselves.</string>
+    <string name="level1TrialPrompt">Try it!</string>
+    <string name="level1TrialButton">Level 1 - Trial</string>
+    <string name="level2Title">Level 2 - Next Level Tic Tac Toe</string>
+    <string name="level2Explanation1">Now it is time for Tic Tac Toe to the next level. In this level, the board is laid out like a giant Tic Tac Toe board, called a metaboard, with smaller Tic Tac Toe boards, called miniboards, in each section of the metaboard. Your purpose in this game is to win 3 of the sections of the metaboard in a row, column or diagonal. Hence, it is like Tic Tac Toe, but with a bit more depth in winning the whole game. Now, unlike normal Tic Tac Toe, the entire metaboard does not remain active throughout the game. Instead, each move one makes decides in which section of the metaboard the opponent will play.</string>
+    <string name="level2Explanation2">As you can see above, the player selected the center square in one of the miniboards. This results in the opponent playing in miniboard occupying the center section of the metaboard. This pattern is followed throughout the game with the various opponents deciding where in the board their opponents may play. Now, as the purpose is to win the individual miniboards to eventually win the metaboard you may like to see how this is done. The miniboards are won the same way as they are in regular Tic Tac Toe, via 3 in a row, column, or diagonal. To mark the victory, the miniboard is replaced with a giant representative of your symbol in the game, as can be seen below.</string>
+    <string name="level2Explanation3">As you can see above, the player could win the center board if he/she is X. As they are, let\'s see what happens.</string>
+    <string name="level2Explanation4">Voila! The won board is replaced with a giant of the symbol, which in this case was X. However, the above picture also represents another important aspect of the game. As we could see, the winning play was to playin the center square. However, that would lead to the opponent playing in the center section of the metaboard, which we just won. Basically, when a player selects his/her opponent to play in a section of the metaboard that is already won, as the opponent cannot play there, the entire metaboard is made available to the opponent. He/she can play anywhere on the metaboard. Hence, when that is the only decision left to you, one must carefully consider as to whether they wish to allow the opponent such power. This is also the pattern that will follow when one chooses a section of the metaboard that is completely full and ended up being a mini-tie.</string>
+    <string name="level2TrialPrompt">Below is the option to give level 2 a trial to better see how it works. Enjoy!</string>
+    <string name="level2TrialButton">Level 2 - Trial</string>
+    <string name="level3Title">Level 3 - Not Available Yet</string>
+    <string name="level4Title">Level 4 - Not Available Yet</string>
+    <!-- Main Menu -->
+    <string name="welcome">Welcome!</string>
+    <string name="mainMenuTitle">Main Menu</string>
+    <string name="instructionsButtonText">Instructions</string>
+    <string name="level1ButtonText">n = 1</string>
+    <string name="level2ButtonText">n = 2</string>
+    <string name="level3ButtonText">n = 3</string>
+    <string name="level4ButtonText">n = 4</string>
+    <string name="savedGamesButtonText">Games Being Played</string>
+    <string name="unavailableLevel">Level %d is not available yet, sorry</string>
+    <!-- Player Selector View -->
+    <string name="playerSelectorTitle">Players</string>
+    <string name="playerSelectorInstructions">Please enter the player names below:</string>
+    <string name="player1Prompt">Player 1</string>
+    <string name="player2Prompt">Player 2</string>
+    <string name="playerNameRequired">Please fill in both player names to continue</string>
+    <!-- Active Game View -->
+    <string name="playersTurn">%s\'s Turn</string>
+    <string name="level1TitleGame">Tic</string>
+    <string name="level2TitleGame">Tic Tac</string>
+    <string name="level3TitleGame">Tic Tac Toe</string>
+    <string name="level4TitleGame">T4</string>
+    <!-- Winner View -->
+    <string name="rematchButton">Rematch?</string>
+    <string name="mainMenuButton">Main Menu</string>
+    <string name="viewGameButton">View Game</string>
+    <string name="tieGame">It\'s a Tie</string>
+    <string name="wonGame">%s WINS!!!\nCongrats!</string>
+    <!-- Current Games View -->
+    <string name="currentGamesTitle">Active Games</string>
+    <string name="savedGamesButton">View Locally Saved Games</string>
+    <string name="facebookHeader">On Facebook:</string>
+    <string name="localHeader">Local:</string>
+</resources>
