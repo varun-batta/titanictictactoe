@@ -127,6 +127,7 @@ class ButtonPressed(
         // See if there is a victory
         val winOrTie = winChecker(row, column, Board.level, Board.level, winCheck, "")
 
+        // TODO: See if this code can be cleaned up a bit
         if (Board.isInstructionalGame) {
             if (currentTurn == "X") {
                 // Your turn in instructional game
@@ -152,6 +153,53 @@ class ButtonPressed(
                                 .show()
                             curInstructionsStep++
                         }
+                    }
+                }
+                if (level == 2) {
+                    if (curInstructionsStep == 3) {
+                        val builder: AlertDialog.Builder = AlertDialog.Builder(context)
+                        builder
+                            .setMessage(R.string.level2Instructions3)
+                            .setNegativeButton("OK") { _, _ -> }
+                            .show()
+                        curInstructionsStep++
+                    }
+                    if (curInstructionsStep == 4) {
+                        // Check if potential win is there for you
+                        val potentialWin = checkForPotentialWin("X", row, column)
+                        if (potentialWin.isPotentialWin) {
+                            val builder: AlertDialog.Builder = AlertDialog.Builder(context)
+                            builder
+                                .setMessage(R.string.level2Instructions4You)
+                                .setNegativeButton("OK") { _, _ -> showButtonToClick(potentialWin.rowIndex, potentialWin.colIndex)}
+                                .show()
+                            curInstructionsStep++
+                        }
+                    }
+                    if (curInstructionsStep == 5) {
+                        val metaboardSelectionName = getMetaboardSelectionName("O")
+                        var alertText = "${context.getString(R.string.level2Instructions6Opponent, metaboardSelectionName.selectionName)} ${context.getString(R.string.level2Instructions6, "O")}"
+                        val builder: AlertDialog.Builder = AlertDialog.Builder(context)
+                        builder
+                            .setMessage(alertText)
+                            .setNegativeButton("OK") { _, _ -> showWarning(metaboardSelectionName.rowIndex, metaboardSelectionName.colIndex, row%3, column%3)}
+                            .show()
+                    }
+                    if (curInstructionsStep == 6) {
+                        // Reset all buttons to their original state
+                        for (r in 0 until 9) {
+                            for (c in 0 until 9) {
+                                val button = Board.keys[r * 9 + c]
+                                button?.setBackgroundColor(Color.TRANSPARENT)
+                            }
+                        }
+
+                        val builder: AlertDialog.Builder = AlertDialog.Builder(context)
+                        builder
+                            .setMessage(R.string.level2Instructions8)
+                            .setNegativeButton("OK") { _, _ -> }
+                            .show()
+                        curInstructionsStep++
                     }
                 }
             }
@@ -183,6 +231,55 @@ class ButtonPressed(
                             makeAIMove()
                         }
                     } else if (!winOrTie) {
+                        makeAIMove()
+                    }
+                }
+                if (level == 2) {
+                    if (curInstructionsStep == 2) {
+                        val selectionName = getSelectionName(row%3, column%3)
+                        val builder: AlertDialog.Builder = AlertDialog.Builder(context)
+                        builder
+                            .setMessage(context.getString(R.string.level2Instructions2, selectionName, selectionName))
+                            .setNegativeButton("OK") { _, _ -> makeAIMove()}
+                            .show()
+                        curInstructionsStep++
+                    } else if (curInstructionsStep == 4) {
+                        // Check if potential win is there for the opponent
+                        val potentialWin = checkForPotentialWin("O", row, column)
+                        if (potentialWin.isPotentialWin) {
+                            val builder: AlertDialog.Builder = AlertDialog.Builder(context)
+                            builder
+                                .setMessage(R.string.level2Instructions4Opponent)
+                                .setNegativeButton("OK") { _, _ -> showButtonToClick(potentialWin.rowIndex, potentialWin.colIndex)}
+                                .show()
+                            curInstructionsStep++
+                        } else {
+                            makeAIMove()
+                        }
+                    } else if (curInstructionsStep == 5) {
+                        val metaboardSelectionName = getMetaboardSelectionName("X")
+                        var alertText = "${context.getString(R.string.level2Instructions6You, metaboardSelectionName.selectionName)} ${context.getString(R.string.level2Instructions6, "X")}"
+                        val builder: AlertDialog.Builder = AlertDialog.Builder(context)
+                        builder
+                            .setMessage(alertText)
+                            .setNegativeButton("OK") { _, _ -> showWarning(metaboardSelectionName.rowIndex, metaboardSelectionName.colIndex, row%3, column%3)}
+                            .show()
+                    } else if (curInstructionsStep == 6) {
+                        // Reset all buttons to their original state
+                        for (r in 0 until 9) {
+                            for (c in 0 until 9) {
+                                val button = Board.keys[r * 9 + c]
+                                button?.setBackgroundColor(Color.TRANSPARENT)
+                            }
+                        }
+
+                        val builder: AlertDialog.Builder = AlertDialog.Builder(context)
+                        builder
+                            .setMessage(R.string.level2Instructions8)
+                            .setNegativeButton("OK") { _, _ -> makeAIMove()}
+                            .show()
+                        curInstructionsStep++
+                    } else {
                         makeAIMove()
                     }
                 }
@@ -475,6 +572,125 @@ class ButtonPressed(
         val isCenter = row == 1 && column == 1
         val isBottomLeft = row == 2 && column == 0
         return isTopRight || isCenter || isBottomLeft
+    }
+
+    fun getSelectionName(row: Int, column: Int): String {
+        var selectionName = ""
+        when(row) {
+            0 -> selectionName += "Top"
+            1 -> selectionName += "Middle"
+            2 -> selectionName += "Bottom"
+        }
+        when(column) {
+            0 -> selectionName += " Left"
+            1 -> if (row == 1) {
+                selectionName = "Center"
+            } else {
+                selectionName += " Middle"
+            }
+            2 -> selectionName += " Right"
+        }
+        return selectionName
+    }
+
+    fun showButtonToClick(row: Int, column: Int) {
+        // Highlight button to click
+        val button = Board.keys[row*9 + column]
+        button?.setBackgroundColor(Color.YELLOW)
+
+        // Disable all other buttons
+        val metaRow = row / 3
+        val metaColumn = column / 3
+        for (r in metaRow*3 until metaRow*3+3) {
+            for (c in metaColumn*3 until metaColumn*3+3) {
+                val button = Board.keys[r*9+c]
+                if (r != row && c != column) {
+                    button?.isEnabled = false
+                }
+            }
+        }
+
+        var alertMessage = context.getString(R.string.level2Instructions5You)
+        if (currentTurn == "O") {
+            alertMessage = context.getString(R.string.level2Instructions5Opponent)
+        }
+        val builder: AlertDialog.Builder = AlertDialog.Builder(context)
+        builder
+            .setMessage(alertMessage)
+            .setNegativeButton("OK") { _, _ ->
+                if (currentTurn == "O") {
+                    onClick(button)
+                }
+            }
+            .show()
+    }
+
+    data class metaboardSelectionName(val selectionName: String, val rowIndex: Int, val colIndex: Int)
+    fun getMetaboardSelectionName(turn: String): metaboardSelectionName {
+        for (r in 0 until 3) {
+            for (c in 0 until 3 ) {
+                if (metaWinCheck[r][c] == turn) {
+                    return metaboardSelectionName(getSelectionName(r, c), r, c)
+                }
+            }
+        }
+        return metaboardSelectionName("", -1, -1)
+    }
+
+    fun showWarning(metaRow: Int, metaColumn: Int, selectedMetaRow: Int, selectedMetaColumn: Int) {
+        val builder: AlertDialog.Builder = AlertDialog.Builder(context)
+        builder
+            .setMessage(R.string.level2Instructions7Part1)
+            .setNegativeButton("Next") { _, _ -> showMetaboardSelection(metaRow, metaColumn, selectedMetaRow, selectedMetaColumn)}
+            .show()
+    }
+
+    fun showMetaboardSelection(metaRow: Int, metaColumn: Int, selectedMetaRow: Int, selectedMetaColumn: Int) {
+        // Highlight all buttons that correspond to warning
+        for (r in 0 until 3) {
+            for (c in 0 until 3) {
+                val button = Board.keys[(r*3 + metaRow)*9 + c*3+metaColumn]
+                button?.setBackgroundColor(Color.YELLOW)
+            }
+        }
+        val builder: AlertDialog.Builder = AlertDialog.Builder(context)
+        builder
+            .setMessage(R.string.level2Instructions7Part2)
+            .setNegativeButton("OK") { _, _ -> forceMetaboardSelection(metaRow, metaColumn, selectedMetaRow, selectedMetaColumn)}
+            .show()
+    }
+
+    fun forceMetaboardSelection(metaRow: Int, metaColumn: Int, selectedMetaRow: Int, selectedMetaColumn: Int) {
+        // Disable all buttons for now and return them back to not highlighted
+        for (r in 0 until 9) {
+            for (c in 0 until 9) {
+                val button = Board.keys[r*9 + c]
+                button?.isEnabled = false
+                button?.setBackgroundColor(Color.TRANSPARENT)
+            }
+        }
+
+        // Highlight and enable only the one button to select
+        val key = (selectedMetaRow * 3 + metaRow) * 9 + selectedMetaColumn * 3 + metaColumn
+        val button = Board.keys[key]
+        button?.isEnabled = true
+        button?.setBackgroundColor(Color.YELLOW)
+
+        // Handle clicking
+        var endingText = context.getString(R.string.level2Instructions7Part3You)
+        if (currentTurn == "O") {
+            endingText = context.getString(R.string.level2Instructions7Part3Opponent)
+        }
+        val builder: AlertDialog.Builder = AlertDialog.Builder(context)
+        builder
+            .setMessage("${context.getString(R.string.level2Instructions7Part2)} ${endingText}")
+            .setNegativeButton("OK") { _, _ ->
+                if (currentTurn == "O") {
+                    onClick(button)
+                }
+                curInstructionsStep++
+            }
+            .show()
     }
 
     // Game Helpers
