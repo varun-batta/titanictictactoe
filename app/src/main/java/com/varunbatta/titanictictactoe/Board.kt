@@ -1,5 +1,6 @@
 package com.varunbatta.titanictictactoe
 
+import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
@@ -24,10 +25,12 @@ class Board : ComponentActivity() {
         lateinit var game : Game
         var level = 0
         var keys = HashMap<Int, Button>()
+        var enabledKeys = mutableListOf<Int>()
         var winCheck = Array(10) { _ -> Array(9) { _ -> ""} }
         var isWinOrTie = false
         var RC_SAVED_GAMES = 9009
         var REQUEST_RESOLVE_ERROR = 1001
+        var isInstructionalGame = false
         lateinit var progressBarHolder: FrameLayout
         lateinit var boardActivity : Board
         lateinit var sharedPreferences: SharedPreferences
@@ -63,6 +66,7 @@ class Board : ComponentActivity() {
         isFinished = intent.getBooleanExtra("IsFinished", false)
         canRematch = intent.getBooleanExtra("Can Rematch", true)
         isSavedGame = intent.getBooleanExtra("Saved Game", false)
+        isInstructionalGame = intent.getBooleanExtra("isInstructionalGame", false)
 
         // TODO: Handle game creation/recreation once saving is implemented
         val player1 = Player(intent.getStringExtra("Player 1 Name")!!, "X")
@@ -110,12 +114,32 @@ class Board : ComponentActivity() {
         bottomPanel = findViewById(R.id.bottom_panel)
         playerTurn = findViewById(R.id.player_turn)
         playerTurn.text = getString(R.string.playersTurn, game.player1.playerName)
+        if (game.player1.playerName == "Your") {
+            playerTurn.text = "Your Turn"
+        }
+
+        if (isInstructionalGame) {
+            ButtonPressed.curInstructionsStep = 2
+            var dialogText = when(level) {
+                1 -> R.string.level1Instructions1
+                2 -> R.string.level2Instructions1
+                else -> -1
+            }
+            val builder: AlertDialog.Builder = AlertDialog.Builder(this)
+            builder
+                .setMessage(dialogText)
+                .setNegativeButton("OK") { dialog, which -> }
+                .show()
+        }
     }
 
     override fun onResume() {
         super.onResume()
         if (game.lastMove == "X") {
             playerTurn.text = getString(R.string.playersTurn, game.player1.playerName)
+            if (game.player1.playerName == "Your") {
+                playerTurn.text = "Your Turn"
+            }
         } else if (game.lastMove.contains("O")) {
             playerTurn.text = getString(R.string.playersTurn, game.player2.playerName)
         }
@@ -144,6 +168,19 @@ class Board : ComponentActivity() {
         super.onRestoreInstanceState(savedInstanceState)
         // TODO: See what this is for (the screen being awakened?)
         onGoingMatch = savedInstanceState.getByteArray("On Going Match")
+    }
+
+    // Instructional Game Helpers
+    fun populateEnabledKeys(metaRow: Int, metaColumn: Int) {
+        enabledKeys = mutableListOf()
+        for ((key, button) in keys) {
+            // Check for whether key should not be put into enabledKeys (it's the same as the section, so user's won't be able to see any movement)
+            val keyMetaColumn = key % 3
+            val keyMetaRow = (key / 9) % 3
+            if (button.isEnabled && keyMetaRow != metaRow && keyMetaColumn != metaColumn) {
+                enabledKeys.add(key)
+            }
+        }
     }
 
     fun savedGameRecreate(onGoingMatch: ByteArray) {
@@ -211,8 +248,12 @@ class Board : ComponentActivity() {
             context.startActivity(winner)
         } else {
             keys = HashMap(6561)
-            bottomPanel.removeAllViews()
-            boardLayout.removeAllViews()
+            if (this::bottomPanel.isInitialized) {
+                bottomPanel.removeAllViews()
+            }
+            if (this::boardLayout.isInitialized) {
+                boardLayout.removeAllViews()
+            }
             val menu = Intent(context, MainMenu::class.java)
             menu.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             context.startActivity(menu)
