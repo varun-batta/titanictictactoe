@@ -2,8 +2,8 @@ package com.varunbatta.titanictictactoe
 
 import android.app.AlertDialog
 import android.content.Context
+import android.content.Intent
 import android.graphics.Color
-import android.util.Log
 import android.view.View
 import android.view.View.OnClickListener
 import android.widget.Button
@@ -15,9 +15,9 @@ import kotlin.random.Random
 
 // TODO: See if all these variables are required (or is there a better way to keep the global state)
 class ButtonPressed(
-    var context: Context,
+    private var context: Context,
     l: Int,
-    var game: Game,
+    private var game: Game,
     var board: Board,
 ) : OnClickListener {
     companion object {
@@ -39,7 +39,7 @@ class ButtonPressed(
         winningLetter = TextView(context)
     }
 
-    fun boardSize(level: Int): Int {
+    private fun boardSize(level: Int): Int {
         return 3.0.pow(level.toDouble()).toInt()
     }
 
@@ -110,6 +110,7 @@ class ButtonPressed(
             }
         }
 
+
         // TODO: See if this is necessary or if one shared data will make this better
         winCheck[row][column] = turn
 
@@ -121,11 +122,13 @@ class ButtonPressed(
         winCheck[winCheck.size - 1][4] = turn
         winCheck[winCheck.size - 1][5] = level.toString()
 
-        // Change board as required
-        boardChanger(row, column, Board.level, true)
-
         // See if there is a victory
-        val winOrTie = winChecker(row, column, Board.level, Board.level, winCheck, "")
+        val winningStatus = winChecker(row, column, Board.level, Board.level, winCheck, "")
+
+        // Change board as required
+        if (!winningStatus.isBoardChangerCalled) {
+            boardChanger(row, column, Board.level, true)
+        }
 
         // TODO: See if this code can be cleaned up a bit
         if (Board.isInstructionalGame) {
@@ -173,16 +176,15 @@ class ButtonPressed(
                                 .setMessage(R.string.level2Instructions4You)
                                 .setNegativeButton("OK") { _, _ -> showButtonToClick(potentialWin.rowIndex, potentialWin.colIndex)}
                                 .show()
-                            curInstructionsStep++
                         }
                     }
                     if (curInstructionsStep == 5) {
-                        val metaboardSelectionName = getMetaboardSelectionName("O")
-                        var alertText = "${context.getString(R.string.level2Instructions6Opponent, metaboardSelectionName.selectionName)} ${context.getString(R.string.level2Instructions6, "O")}"
+                        val metaBoardSelectionName = getMetaBoardSelectionName("O")
+                        val alertText = "${context.getString(R.string.level2Instructions6Opponent, metaBoardSelectionName.selectionName)} ${context.getString(R.string.level2Instructions6, "O")}"
                         val builder: AlertDialog.Builder = AlertDialog.Builder(context)
                         builder
                             .setMessage(alertText)
-                            .setNegativeButton("OK") { _, _ -> showWarning(metaboardSelectionName.rowIndex, metaboardSelectionName.colIndex, row%3, column%3)}
+                            .setNegativeButton("OK") { _, _ -> showWarning(metaBoardSelectionName.rowIndex, metaBoardSelectionName.colIndex, row%3, column%3)}
                             .show()
                     }
                     if (curInstructionsStep == 6) {
@@ -230,7 +232,7 @@ class ButtonPressed(
                         } else {
                             makeAIMove()
                         }
-                    } else if (!winOrTie) {
+                    } else if (!winningStatus.winOrTie) {
                         makeAIMove()
                     }
                 }
@@ -252,17 +254,16 @@ class ButtonPressed(
                                 .setMessage(R.string.level2Instructions4Opponent)
                                 .setNegativeButton("OK") { _, _ -> showButtonToClick(potentialWin.rowIndex, potentialWin.colIndex)}
                                 .show()
-                            curInstructionsStep++
                         } else {
                             makeAIMove()
                         }
                     } else if (curInstructionsStep == 5) {
-                        val metaboardSelectionName = getMetaboardSelectionName("X")
-                        var alertText = "${context.getString(R.string.level2Instructions6You, metaboardSelectionName.selectionName)} ${context.getString(R.string.level2Instructions6, "X")}"
+                        val metaBoardSelectionName = getMetaBoardSelectionName("X")
+                        val alertText = "${context.getString(R.string.level2Instructions6You, metaBoardSelectionName.selectionName)} ${context.getString(R.string.level2Instructions6, "X")}"
                         val builder: AlertDialog.Builder = AlertDialog.Builder(context)
                         builder
                             .setMessage(alertText)
-                            .setNegativeButton("OK") { _, _ -> showWarning(metaboardSelectionName.rowIndex, metaboardSelectionName.colIndex, row%3, column%3)}
+                            .setNegativeButton("OK") { _, _ -> showWarning(metaBoardSelectionName.rowIndex, metaBoardSelectionName.colIndex, row%3, column%3)}
                             .show()
                     } else if (curInstructionsStep == 6) {
                         // Reset all buttons to their original state
@@ -299,7 +300,7 @@ class ButtonPressed(
         var rowIndex: Int = -1
         for (i in 0 until 3) {
             for (j in 0 until 3) {
-                if (ButtonPressed.winCheck[i][j] == "X") {
+                if (winCheck[i][j] == "X") {
                     rowIndex = i
                     break
                 }
@@ -326,7 +327,7 @@ class ButtonPressed(
         var colIndex: Int = -1
         for (i in 0 until 3) {
             for (j in 0 until 3) {
-                if (ButtonPressed.winCheck[i][j] == "X") {
+                if (winCheck[i][j] == "X") {
                     colIndex = j
                     break
                 }
@@ -361,13 +362,13 @@ class ButtonPressed(
         var colIndex: Int = -1
         for (i in 0 until 3) {
             for (j in 0 until 3) {
-                if (ButtonPressed.winCheck[i][j] == "X") {
+                if (winCheck[i][j] == "X") {
                     rowIndex = i
                     colIndex = j
                     break
                 }
             }
-            if (rowIndex != -1 && colIndex != -1) {
+            if (rowIndex != -1) {
                 break
             }
         }
@@ -418,8 +419,8 @@ class ButtonPressed(
             .show()
     }
 
-    data class potentialWin(val isPotentialWin: Boolean, val rowIndex: Int, val colIndex: Int)
-    fun checkForPotentialWin(playerTurn: String, row: Int, column: Int): potentialWin {
+    data class PotentialWin(val isPotentialWin: Boolean, val rowIndex: Int, val colIndex: Int)
+    private fun checkForPotentialWin(playerTurn: String, row: Int, column: Int): PotentialWin {
         if (level == 1) {
             // Check row option
             var found = -1
@@ -433,7 +434,7 @@ class ButtonPressed(
                 }
             }
             if (found != -1 && empty != -1) {
-                return potentialWin(true, row, empty)
+                return PotentialWin(true, row, empty)
             }
             // Check column option
             found = -1
@@ -447,7 +448,7 @@ class ButtonPressed(
                 }
             }
             if (found != -1 && empty != -1) {
-                return potentialWin(true, empty, column)
+                return PotentialWin(true, empty, column)
             }
             // Check top left to bottom right diagonal
             if (row == column) {
@@ -462,7 +463,7 @@ class ButtonPressed(
                     }
                 }
                 if (found != -1 && empty != -1) {
-                    return potentialWin(true, empty, empty)
+                    return PotentialWin(true, empty, empty)
                 }
             }
             // Check top right to bottom left diagonal
@@ -484,7 +485,7 @@ class ButtonPressed(
                     c--
                 }
                 if (foundRow != -1 && foundCol != -1 && emptyRow != -1 && emptyCol != -1) {
-                    return potentialWin(true, emptyRow, emptyCol)
+                    return PotentialWin(true, emptyRow, emptyCol)
                 }
             }
         }
@@ -504,7 +505,7 @@ class ButtonPressed(
                     }
                 }
                 if (foundIndices.size == 2 && emptyIndices.size == 1) {
-                    return potentialWin(true, r, emptyIndices[0])
+                    return PotentialWin(true, r, emptyIndices[0])
                 }
             }
             // Check column option
@@ -520,7 +521,7 @@ class ButtonPressed(
                     }
                 }
                 if (foundIndices.size == 2 && emptyIndices.size == 1) {
-                    return potentialWin(true, emptyIndices[0], c)
+                    return PotentialWin(true, emptyIndices[0], c)
                 }
             }
             // Check top left to bottom right diagonal
@@ -541,7 +542,7 @@ class ButtonPressed(
                 c++
             }
             if (foundRows.size == 2 && foundColumns.size == 2 && emptyRows.size == 1 && emptyColumns.size == 1) {
-                return potentialWin(true, emptyRows[0], emptyColumns[0])
+                return PotentialWin(true, emptyRows[0], emptyColumns[0])
             }
             // Check top right to bottom left diagonal
             foundRows.clear()
@@ -561,20 +562,20 @@ class ButtonPressed(
                 c--
             }
             if (foundRows.size == 2 && foundColumns.size == 2 && emptyRows.size == 1 && emptyColumns.size == 1) {
-                return potentialWin(true, emptyRows[0], emptyColumns[0])
+                return PotentialWin(true, emptyRows[0], emptyColumns[0])
             }
         }
-        return potentialWin(false, -1, -1)
+        return PotentialWin(false, -1, -1)
     }
 
-    fun isInTopRightToBottomLeftDiagonal(row: Int, column: Int): Boolean {
+    private fun isInTopRightToBottomLeftDiagonal(row: Int, column: Int): Boolean {
         val isTopRight = row == 0 && column == 2
         val isCenter = row == 1 && column == 1
         val isBottomLeft = row == 2 && column == 0
         return isTopRight || isCenter || isBottomLeft
     }
 
-    fun getSelectionName(row: Int, column: Int): String {
+    private fun getSelectionName(row: Int, column: Int): String {
         var selectionName = ""
         when(row) {
             0 -> selectionName += "Top"
@@ -593,7 +594,7 @@ class ButtonPressed(
         return selectionName
     }
 
-    fun showButtonToClick(row: Int, column: Int) {
+    private fun showButtonToClick(row: Int, column: Int) {
         // Highlight button to click
         val button = Board.keys[row*9 + column]
         button?.setBackgroundColor(Color.YELLOW)
@@ -603,9 +604,9 @@ class ButtonPressed(
         val metaColumn = column / 3
         for (r in metaRow*3 until metaRow*3+3) {
             for (c in metaColumn*3 until metaColumn*3+3) {
-                val button = Board.keys[r*9+c]
+                val b = Board.keys[r*9+c]
                 if (r != row && c != column) {
-                    button?.isEnabled = false
+                    b?.isEnabled = false
                 }
             }
         }
@@ -618,6 +619,7 @@ class ButtonPressed(
         builder
             .setMessage(alertMessage)
             .setNegativeButton("OK") { _, _ ->
+                curInstructionsStep++
                 if (currentTurn == "O") {
                     onClick(button)
                 }
@@ -625,27 +627,27 @@ class ButtonPressed(
             .show()
     }
 
-    data class metaboardSelectionName(val selectionName: String, val rowIndex: Int, val colIndex: Int)
-    fun getMetaboardSelectionName(turn: String): metaboardSelectionName {
+    data class MetaBoardSelectionName(val selectionName: String, val rowIndex: Int, val colIndex: Int)
+    private fun getMetaBoardSelectionName(turn: String): MetaBoardSelectionName {
         for (r in 0 until 3) {
             for (c in 0 until 3 ) {
                 if (metaWinCheck[r][c] == turn) {
-                    return metaboardSelectionName(getSelectionName(r, c), r, c)
+                    return MetaBoardSelectionName(getSelectionName(r, c), r, c)
                 }
             }
         }
-        return metaboardSelectionName("", -1, -1)
+        return MetaBoardSelectionName("", -1, -1)
     }
 
-    fun showWarning(metaRow: Int, metaColumn: Int, selectedMetaRow: Int, selectedMetaColumn: Int) {
+    private fun showWarning(metaRow: Int, metaColumn: Int, selectedMetaRow: Int, selectedMetaColumn: Int) {
         val builder: AlertDialog.Builder = AlertDialog.Builder(context)
         builder
             .setMessage(R.string.level2Instructions7Part1)
-            .setNegativeButton("Next") { _, _ -> showMetaboardSelection(metaRow, metaColumn, selectedMetaRow, selectedMetaColumn)}
+            .setNegativeButton("Next") { _, _ -> showMetaBoardSelection(metaRow, metaColumn, selectedMetaRow, selectedMetaColumn)}
             .show()
     }
 
-    fun showMetaboardSelection(metaRow: Int, metaColumn: Int, selectedMetaRow: Int, selectedMetaColumn: Int) {
+    private fun showMetaBoardSelection(metaRow: Int, metaColumn: Int, selectedMetaRow: Int, selectedMetaColumn: Int) {
         // Highlight all buttons that correspond to warning
         for (r in 0 until 3) {
             for (c in 0 until 3) {
@@ -656,11 +658,11 @@ class ButtonPressed(
         val builder: AlertDialog.Builder = AlertDialog.Builder(context)
         builder
             .setMessage(R.string.level2Instructions7Part2)
-            .setNegativeButton("OK") { _, _ -> forceMetaboardSelection(metaRow, metaColumn, selectedMetaRow, selectedMetaColumn)}
+            .setNegativeButton("OK") { _, _ -> forceMetaBoardSelection(metaRow, metaColumn, selectedMetaRow, selectedMetaColumn)}
             .show()
     }
 
-    fun forceMetaboardSelection(metaRow: Int, metaColumn: Int, selectedMetaRow: Int, selectedMetaColumn: Int) {
+    private fun forceMetaBoardSelection(metaRow: Int, metaColumn: Int, selectedMetaRow: Int, selectedMetaColumn: Int) {
         // Disable all buttons for now and return them back to not highlighted
         for (r in 0 until 9) {
             for (c in 0 until 9) {
@@ -676,6 +678,7 @@ class ButtonPressed(
         button?.isEnabled = true
         button?.setBackgroundColor(Color.YELLOW)
 
+        // TODO: Handle the case where you can't click on that because it's already selected
         // Handle clicking
         var endingText = context.getString(R.string.level2Instructions7Part3You)
         if (currentTurn == "O") {
@@ -683,14 +686,24 @@ class ButtonPressed(
         }
         val builder: AlertDialog.Builder = AlertDialog.Builder(context)
         builder
-            .setMessage("${context.getString(R.string.level2Instructions7Part2)} ${endingText}")
+            .setMessage("${context.getString(R.string.level2Instructions7Part2)} $endingText")
             .setNegativeButton("OK") { _, _ ->
+                curInstructionsStep++
                 if (currentTurn == "O") {
                     onClick(button)
                 }
-                curInstructionsStep++
             }
             .show()
+    }
+
+    private fun changeToNextLevelInstructions() {
+        board.finishActivity(context, false, "")
+        val boardIntent = Intent(context, Board::class.java)
+        boardIntent.putExtra("isInstructionalGame", true)
+        boardIntent.putExtra("Player 1 Name", "Your")
+        boardIntent.putExtra("Player 2 Name", "AI")
+        boardIntent.putExtra("Level", 2)
+        context.startActivity(boardIntent)
     }
 
     // Game Helpers
@@ -814,38 +827,40 @@ class ButtonPressed(
         return boardLevel == "Outer" && isOuterTied || boardLevel == "Inner" && isInnerTied
     }
 
-    fun winChecker(rowIndex: Int, columnIndex: Int, testLevel: Int, actualLevel: Int, winChecker: Array<Array<String>>, turnValue: String): Boolean {
+    data class WinningStatus(val winOrTie: Boolean, val isBoardChangerCalled: Boolean)
+    fun winChecker(rowIndex: Int, columnIndex: Int, testLevel: Int, actualLevel: Int, winChecker: Array<Array<String>>, turnValue: String): WinningStatus {
         // TODO: Refactor this function
         var winOrTie = false
+        var isBoardChangerCalled = false
         var value = ""
         var value1 = ""
         var value2 = ""
         var x = ""
-        var rowIndex = rowIndex
-        var columnIndex = columnIndex
+        var r = rowIndex
+        var c = columnIndex
 
         if (testLevel == 1 && actualLevel >= 2) {
-            rowIndex /= 3
-            columnIndex /= 3
+            r /= 3
+            c /= 3
         }
 
         // Check the column
         // TODO: Clean up this approach - possible solution is just use rowIndex/3 as the base
-        when (rowIndex % 3) {
+        when (r % 3) {
             0 -> {
-                value = winChecker[rowIndex][columnIndex]
-                value1 = winChecker[rowIndex + 1][columnIndex]
-                value2 = winChecker[rowIndex + 2][columnIndex]
+                value = winChecker[r][c]
+                value1 = winChecker[r + 1][c]
+                value2 = winChecker[r + 2][c]
             }
             1 -> {
-                value = winChecker[rowIndex - 1][columnIndex]
-                value1 = winChecker[rowIndex][columnIndex]
-                value2 = winChecker[rowIndex + 1][columnIndex]
+                value = winChecker[r - 1][c]
+                value1 = winChecker[r][c]
+                value2 = winChecker[r + 1][c]
             }
             2 -> {
-                value = winChecker[rowIndex - 2][columnIndex]
-                value1 = winChecker[rowIndex - 1][columnIndex]
-                value2 = winChecker[rowIndex][columnIndex]
+                value = winChecker[r - 2][c]
+                value1 = winChecker[r - 1][c]
+                value2 = winChecker[r][c]
             }
         }
 
@@ -860,21 +875,21 @@ class ButtonPressed(
 
         // Check the row
         // TODO: Clean up this approach - possible solution is just use columnIndex/3 as the base
-        when (columnIndex % 3) {
+        when (c % 3) {
             0 -> {
-                value = winChecker[rowIndex][columnIndex]
-                value1 = winChecker[rowIndex][columnIndex + 1]
-                value2 = winChecker[rowIndex][columnIndex + 2]
+                value = winChecker[r][c]
+                value1 = winChecker[r][c + 1]
+                value2 = winChecker[r][c + 2]
             }
             1 -> {
-                value = winChecker[rowIndex][columnIndex - 1]
-                value1 = winChecker[rowIndex][columnIndex]
-                value2 = winChecker[rowIndex][columnIndex + 1]
+                value = winChecker[r][c - 1]
+                value1 = winChecker[r][c]
+                value2 = winChecker[r][c + 1]
             }
             2 -> {
-                value = winChecker[rowIndex][columnIndex - 2]
-                value1 = winChecker[rowIndex][columnIndex - 1]
-                value2 = winChecker[rowIndex][columnIndex]
+                value = winChecker[r][c - 2]
+                value1 = winChecker[r][c - 1]
+                value2 = winChecker[r][c]
             }
         }
 
@@ -889,18 +904,18 @@ class ButtonPressed(
 
         // Check the top-left to bottom-right diagonal
         // TODO: Clean up this approach - possible solution is just use columnIndex/3 & rowIndex/3 as the base
-        if (rowIndex % 3 == 0 && columnIndex % 3 == 0) {
-            value = winChecker[rowIndex][columnIndex]
-            value1 = winChecker[rowIndex + 1][columnIndex + 1]
-            value2 = winChecker[rowIndex + 2][columnIndex + 2]
-        } else if (rowIndex % 3 == 1 && columnIndex % 3 == 1) {
-            value = winChecker[rowIndex - 1][columnIndex - 1]
-            value1 = winChecker[rowIndex][columnIndex]
-            value2 = winChecker[rowIndex + 1][columnIndex + 1]
-        } else if (rowIndex % 3 == 2 && columnIndex %3 == 2) {
-            value = winChecker[rowIndex - 2][columnIndex - 2]
-            value1 = winChecker[rowIndex - 1][columnIndex - 1]
-            value2 = winChecker[rowIndex][columnIndex]
+        if (r % 3 == 0 && c % 3 == 0) {
+            value = winChecker[r][c]
+            value1 = winChecker[r + 1][c + 1]
+            value2 = winChecker[r + 2][c + 2]
+        } else if (r % 3 == 1 && c % 3 == 1) {
+            value = winChecker[r - 1][c - 1]
+            value1 = winChecker[r][c]
+            value2 = winChecker[r + 1][c + 1]
+        } else if (r % 3 == 2 && c %3 == 2) {
+            value = winChecker[r - 2][c - 2]
+            value1 = winChecker[r - 1][c - 1]
+            value2 = winChecker[r][c]
         }
 
         // Seeing if all the cells in the row have the same value
@@ -914,18 +929,18 @@ class ButtonPressed(
 
         // Check the top-right to bottom-left diagonal
         // TODO: Clean up this approach - possible solution is just use columnIndex/3 & rowIndex/3 as the base
-        if (rowIndex % 3 == 2 && columnIndex % 3 == 0) {
-            value = winChecker[rowIndex][columnIndex]
-            value1 = winChecker[rowIndex - 1][columnIndex + 1]
-            value2 = winChecker[rowIndex - 2][columnIndex + 2]
-        } else if (rowIndex % 3 == 1 && columnIndex % 3 == 1) {
-            value = winChecker[rowIndex + 1][columnIndex - 1]
-            value1 = winChecker[rowIndex][columnIndex]
-            value2 = winChecker[rowIndex - 1][columnIndex + 1]
-        } else if (rowIndex % 3 == 0 && columnIndex %3 == 2) {
-            value = winChecker[rowIndex + 2][columnIndex - 2]
-            value1 = winChecker[rowIndex + 1][columnIndex - 1]
-            value2 = winChecker[rowIndex][columnIndex]
+        if (r % 3 == 2 && c % 3 == 0) {
+            value = winChecker[r][c]
+            value1 = winChecker[r - 1][c + 1]
+            value2 = winChecker[r - 2][c + 2]
+        } else if (r % 3 == 1 && c % 3 == 1) {
+            value = winChecker[r + 1][c - 1]
+            value1 = winChecker[r][c]
+            value2 = winChecker[r - 1][c + 1]
+        } else if (r % 3 == 0 && c %3 == 2) {
+            value = winChecker[r + 2][c - 2]
+            value1 = winChecker[r + 1][c - 1]
+            value2 = winChecker[r][c]
         }
 
         // Seeing if all the cells in the row have the same value
@@ -953,6 +968,7 @@ class ButtonPressed(
         }
 
         // Change board as necessary based off if a winner was found
+        // TODO: Handle the tie case and losing case for instructions too
         if (x != "") {
             when(testLevel) {
                 1 -> {
@@ -971,7 +987,9 @@ class ButtonPressed(
                                 .setNegativeButton("Not now") { _, _ ->
                                     board.finishActivity(context, false, "")
                                 }
-                                .setPositiveButton("Next") { _, _ -> }
+                                .setPositiveButton("Next") { _, _ ->
+                                    changeToNextLevelInstructions()
+                                }
                         }
                         if (actualLevel == 2) {
                             builder
@@ -987,27 +1005,27 @@ class ButtonPressed(
                 }
                 2 -> {
                     if (actualLevel == 2) {
-                        Log.d("Change", "$x $actualLevel")
-                        board.winningBoardChanger(rowIndex, columnIndex, testLevel, actualLevel, x, context, winCheck)
+                        board.winningBoardChanger(r, c, testLevel, actualLevel, x, context, winCheck)
+                        isBoardChangerCalled = true
                     }
                 }
             }
         }
 
         // Check for ties as well
-        var tieCheckerString = when(Board.level) {
+        val tieCheckerString = when(Board.level) {
             1 -> "Inner"
             2 -> "Outer"
             else -> ""
         }
 
         // Handle it in case a tie is found
-        if (!winOrTie && x == "" && tieChecker(tieCheckerString, testLevel, rowIndex, columnIndex)) {
+        if (!winOrTie && x == "" && tieChecker(tieCheckerString, testLevel, r, c)) {
             board.finishActivity(context, true, "Tie")
             winOrTie = true
         }
 
-        return winOrTie
+        return WinningStatus(winOrTie, isBoardChangerCalled)
     }
 
     /*

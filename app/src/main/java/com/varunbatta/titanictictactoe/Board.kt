@@ -16,8 +16,6 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.activity.ComponentActivity
 import androidx.core.content.ContextCompat
-import java.util.Timer
-import java.util.TimerTask
 
 class Board : ComponentActivity() {
     // TODO: See how many of these variables are required
@@ -35,20 +33,20 @@ class Board : ComponentActivity() {
         lateinit var boardActivity : Board
         lateinit var sharedPreferences: SharedPreferences
     }
-    lateinit var playerTurn : TextView
-    var isOnCreateCalled = false
-    var isBoardVisible = false
-    var row = -1
-    var column = -1
-    var onGoingMatch : ByteArray? = null
-    lateinit var bp : ButtonPressed
-    lateinit var context: Context
-    lateinit var bottomPanel: LinearLayout
-    lateinit var boardLayout: LinearLayout
-    var isMyTurn = false
-    var isSavedGame = false
-    var isFinished = false
-    var canRematch = false
+    private lateinit var playerTurn : TextView
+    private var isOnCreateCalled = false
+    private var isBoardVisible = false
+    private var row = -1
+    private var column = -1
+    private var onGoingMatch : ByteArray? = null
+    private lateinit var bp : ButtonPressed
+    private lateinit var context: Context
+    private lateinit var bottomPanel: LinearLayout
+    private lateinit var boardLayout: LinearLayout
+    private var isMyTurn = false
+    private var isSavedGame = false
+    private var isFinished = false
+    private var canRematch = false
     var isSaveCalled = false
     var isResolvingError = false
     lateinit var board : BasicBoardView
@@ -161,7 +159,7 @@ class Board : ComponentActivity() {
                 Base64.DEFAULT
             )
         )
-        editor.commit()
+        editor.apply()
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
@@ -209,6 +207,13 @@ class Board : ComponentActivity() {
             miniBoard?.findViewById<ImageView>(R.id.boardBackground)?.alpha = 0f
             miniBoard?.findViewById<ImageView>(R.id.boardBackgroundRed)?.alpha = 0f
             miniBoard?.findViewById<LinearLayout>(R.id.overlaying_linear_layout)?.alpha = 0f
+            // Making sure to disable keys in the won section so that enabled keys are populated correctly
+            for (r in (rowIndex/3)*3 until (rowIndex/3)*3 + 3) {
+                for (c in (columnIndex/3)*3 until (columnIndex/3)*3 + 3) {
+                    val button = keys[r*9+c]
+                    button?.isEnabled = false
+                }
+            }
             val won = TextView(context)
             won.layoutParams = miniBoard?.layoutParams
             won.text = x
@@ -216,28 +221,19 @@ class Board : ComponentActivity() {
             won.setTextColor(ContextCompat.getColor(context, R.color.colorBlack))
             won.textAlignment = View.TEXT_ALIGNMENT_CENTER
             miniBoard?.addView(won)
-
-            // Create a timed UI event to handle the reload (as necessary)
-            Timer().schedule(object : TimerTask() {
-                override fun run() {
-                    // If you want to operate UI modifications, you must run ui stuff on UiThread.
-                    runOnUiThread {
-                        bp.boardChanger(row, column, 2, true)
-                        if (bp.tieChecker("Outer", level, row, column)) {
-                            finishActivity(context, true, "Tie")
-                        }
-                    }
-                    isWinOrTie =
-                        bp.winChecker(rowIndex, columnIndex, 1, 2, ButtonPressed.metaWinCheck, x)
-                }
-            }, 500)
+            bp.boardChanger(row, column, 2, true)
+            if (bp.tieChecker("Outer", level, row, column)) {
+                finishActivity(context, true, "Tie")
+            }
+            val winningStatus = bp.winChecker(rowIndex, columnIndex, 1, 2, ButtonPressed.metaWinCheck, x)
+            isWinOrTie = winningStatus.winOrTie
         }
     }
 
     fun finishActivity(context: Context, isWon: Boolean, winnerName: String) {
         val editor = sharedPreferences.edit()
         editor.clear()
-        editor.commit()
+        editor.apply()
 
         // TODO: Clean this up as necessary
         if (isWon) {
