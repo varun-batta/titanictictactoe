@@ -1,6 +1,6 @@
 package com.varunbatta.titanictictactoe
 
-import android.content.Context
+import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
@@ -16,8 +16,16 @@ class MainMenu : ComponentActivity() {
 
         val instructionsButton = findViewById<Button>(R.id.instructionsButton)
         instructionsButton.setOnClickListener {
-            val instructionsIntent = Intent(this, Instructions::class.java)
-            startActivity(instructionsIntent)
+            val builder: AlertDialog.Builder = AlertDialog.Builder(this)
+            builder
+                .setMessage(R.string.instructionsPrompt)
+                .setPositiveButton("Yes") { dialog, which ->
+                    instructionalGame(2)
+                }
+                .setNegativeButton("No") { dialog, which ->
+                    instructionalGame(1)
+                }
+                .show()
         }
 
         val level1 = findViewById<Button>(R.id.level1Button)
@@ -42,6 +50,16 @@ class MainMenu : ComponentActivity() {
         val playerSelectorIntent = Intent(this, PlayerSelector::class.java)
         playerSelectorIntent.putExtra("Level", level)
         startActivity(playerSelectorIntent)
+        this.finish()
+    }
+
+    private fun instructionalGame(level: Int) {
+        val boardIntent = Intent(this, Board::class.java)
+        boardIntent.putExtra("isInstructionalGame", true)
+        boardIntent.putExtra("Player 1 Name", "Your")
+        boardIntent.putExtra("Player 2 Name", "AI")
+        boardIntent.putExtra("Level", level)
+        startActivity(boardIntent)
         this.finish()
     }
 }
