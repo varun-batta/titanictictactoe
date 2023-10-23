@@ -126,7 +126,7 @@ class Board : ComponentActivity() {
             val builder: AlertDialog.Builder = AlertDialog.Builder(this)
             builder
                 .setMessage(dialogText)
-                .setNegativeButton("OK") { dialog, which -> }
+                .setNegativeButton("OK") { _, _ -> }
                 .show()
         }
     }

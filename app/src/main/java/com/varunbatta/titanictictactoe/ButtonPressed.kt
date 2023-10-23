@@ -187,22 +187,6 @@ class ButtonPressed(
                             .setNegativeButton("OK") { _, _ -> showWarning(metaBoardSelectionName.rowIndex, metaBoardSelectionName.colIndex, row%3, column%3)}
                             .show()
                     }
-                    if (curInstructionsStep == 6) {
-                        // Reset all buttons to their original state
-                        for (r in 0 until 9) {
-                            for (c in 0 until 9) {
-                                val button = Board.keys[r * 9 + c]
-                                button?.setBackgroundColor(Color.TRANSPARENT)
-                            }
-                        }
-
-                        val builder: AlertDialog.Builder = AlertDialog.Builder(context)
-                        builder
-                            .setMessage(R.string.level2Instructions8)
-                            .setNegativeButton("OK") { _, _ -> }
-                            .show()
-                        curInstructionsStep++
-                    }
                 }
             }
             if (currentTurn == "O") {
@@ -265,21 +249,6 @@ class ButtonPressed(
                             .setMessage(alertText)
                             .setNegativeButton("OK") { _, _ -> showWarning(metaBoardSelectionName.rowIndex, metaBoardSelectionName.colIndex, row%3, column%3)}
                             .show()
-                    } else if (curInstructionsStep == 6) {
-                        // Reset all buttons to their original state
-                        for (r in 0 until 9) {
-                            for (c in 0 until 9) {
-                                val button = Board.keys[r * 9 + c]
-                                button?.setBackgroundColor(Color.TRANSPARENT)
-                            }
-                        }
-
-                        val builder: AlertDialog.Builder = AlertDialog.Builder(context)
-                        builder
-                            .setMessage(R.string.level2Instructions8)
-                            .setNegativeButton("OK") { _, _ -> makeAIMove()}
-                            .show()
-                        curInstructionsStep++
                     } else {
                         makeAIMove()
                     }
@@ -658,11 +627,11 @@ class ButtonPressed(
         val builder: AlertDialog.Builder = AlertDialog.Builder(context)
         builder
             .setMessage(R.string.level2Instructions7Part2)
-            .setNegativeButton("OK") { _, _ -> forceMetaBoardSelection(metaRow, metaColumn, selectedMetaRow, selectedMetaColumn)}
+            .setNegativeButton("OK") { _, _ -> demoMetaBoardSelection(selectedMetaRow, selectedMetaColumn)}
             .show()
     }
 
-    private fun forceMetaBoardSelection(metaRow: Int, metaColumn: Int, selectedMetaRow: Int, selectedMetaColumn: Int) {
+    private fun demoMetaBoardSelection(selectedMetaRow: Int, selectedMetaColumn: Int) {
         // Disable all buttons for now and return them back to not highlighted
         for (r in 0 until 9) {
             for (c in 0 until 9) {
@@ -672,25 +641,60 @@ class ButtonPressed(
             }
         }
 
-        // Highlight and enable only the one button to select
-        val key = (selectedMetaRow * 3 + metaRow) * 9 + selectedMetaColumn * 3 + metaColumn
-        val button = Board.keys[key]
-        button?.isEnabled = true
-        button?.setBackgroundColor(Color.YELLOW)
-
-        // TODO: Handle the case where you can't click on that because it's already selected
-        // Handle clicking
-        var endingText = context.getString(R.string.level2Instructions7Part3You)
-        if (currentTurn == "O") {
-            endingText = context.getString(R.string.level2Instructions7Part3Opponent)
+        // Fake the clicking
+        for (i in 0 until 9) {
+            for (j in 0 until 9) {
+                if (metaWinCheck[i / 3][j / 3] == "") {
+                    val button = Board.keys[i*9 + j]
+                    if (button != null && button.text == "") {
+                        button.isEnabled = true
+                        val section = BasicBoardView.metaBoard[i / 3][j / 3]?.findViewById<ImageView>(R.id.boardBackgroundRed)
+                        section?.imageAlpha = 0
+                    }
+                }
+            }
         }
+
+        // Show the prompt
+        val endingText = context.getString(R.string.level2Instructions7Part3)
         val builder: AlertDialog.Builder = AlertDialog.Builder(context)
         builder
             .setMessage("${context.getString(R.string.level2Instructions7Part2)} $endingText")
             .setNegativeButton("OK") { _, _ ->
+                resetBoard(selectedMetaRow, selectedMetaColumn)
+            }
+            .show()
+    }
+
+    private fun resetBoard(selectedMetaRow: Int, selectedMetaColumn: Int) {
+        if (metaWinCheck[selectedMetaRow][selectedMetaColumn] == "") {
+            for (i in 0 until 9) {
+                for (j in 0 until 9) {
+                    if (metaWinCheck[i / 3][j / 3] == "") {
+                        val button = Board.keys[i * 9 + j]
+                        var isEnabled = false
+                        var alpha = 150
+                        if (i / 3 == selectedMetaRow && j / 3 == selectedMetaColumn) {
+                            isEnabled = true
+                            alpha = 0
+                        }
+                        if (button != null && button.text == "") {
+                            button.isEnabled = isEnabled
+                            val section =
+                                BasicBoardView.metaBoard[i / 3][j / 3]?.findViewById<ImageView>(R.id.boardBackgroundRed)
+                            section?.imageAlpha = alpha
+                        }
+                    }
+                }
+            }
+        }
+        val builder: AlertDialog.Builder = AlertDialog.Builder(context)
+        builder
+            .setMessage(R.string.level2Instructions8)
+            .setNegativeButton("OK") { _, _ ->
                 curInstructionsStep++
                 if (currentTurn == "O") {
-                    onClick(button)
+                    makeAIMove()
                 }
             }
             .show()
@@ -704,6 +708,38 @@ class ButtonPressed(
         boardIntent.putExtra("Player 2 Name", "AI")
         boardIntent.putExtra("Level", 2)
         context.startActivity(boardIntent)
+    }
+
+    private fun showClosingAlertDialog(level: Int, winningCharacter: String) {
+        var message = when(winningCharacter) {
+            "X" -> context.getString(R.string.instructionsYouWon)
+            "O" -> context.getString(R.string.instructionsOpponentWon)
+            else -> context.getString(R.string.instructionsTied)
+        }
+        if (level == 1) {
+            message += " ${context.getString(R.string.level1Instructions9)}"
+        }
+        if (level == 2) {
+            message += " ${context.getString(R.string.level2Instructions9)}"
+        }
+        val builder: AlertDialog.Builder = AlertDialog.Builder(context)
+        builder
+            .setMessage(message)
+        if (level == 1) {
+            builder
+                .setNegativeButton("Not now") { _, _ ->
+                    board.finishActivity(context, false, "")
+                }
+                .setPositiveButton("Next") { _, _ ->
+                    changeToNextLevelInstructions()
+                }
+        }
+        if (level == 2) {
+            builder
+                .setNegativeButton("Done") { _, _ ->
+                    board.finishActivity(context, false, "")                                }
+        }
+        builder.show()
     }
 
     // Game Helpers
@@ -955,48 +991,21 @@ class ButtonPressed(
         // Setting the winning player name and winning letter
         // TODO: Make this not based on the letter being played (if possible)
         var winningPlayerName = ""
-        var winningMessage = ""
         if (x == "X") {
             winningPlayerName = game.player1.playerName
             winningLetter.text = "X"
-            winningMessage += context.getString(R.string.instructionsYouWon)
         }
         if (x == "O") {
             winningPlayerName = game.player2.playerName
             winningLetter.text = "O"
-            winningMessage += context.getString(R.string.instructionsOpponentWon)
         }
 
         // Change board as necessary based off if a winner was found
-        // TODO: Handle the tie case and losing case for instructions too
         if (x != "") {
             when(testLevel) {
                 1 -> {
                     if (Board.isInstructionalGame) {
-                        if (actualLevel == 1) {
-                            winningMessage += " ${context.getString(R.string.level1Instructions9)}"
-                        }
-                        if (actualLevel == 2) {
-                            winningMessage += " ${context.getString(R.string.level2Instructions9)}"
-                        }
-                        val builder: AlertDialog.Builder = AlertDialog.Builder(context)
-                        builder
-                            .setMessage(winningMessage)
-                        if (actualLevel == 1) {
-                            builder
-                                .setNegativeButton("Not now") { _, _ ->
-                                    board.finishActivity(context, false, "")
-                                }
-                                .setPositiveButton("Next") { _, _ ->
-                                    changeToNextLevelInstructions()
-                                }
-                        }
-                        if (actualLevel == 2) {
-                            builder
-                                .setNegativeButton("Done") { _, _ ->
-                                    board.finishActivity(context, false, "")                                }
-                        }
-                        builder.show()
+                        showClosingAlertDialog(actualLevel, x)
                     } else {
                         board.finishActivity(context, true, winningPlayerName)
                         Board.isWinOrTie = true
@@ -1021,7 +1030,11 @@ class ButtonPressed(
 
         // Handle it in case a tie is found
         if (!winOrTie && x == "" && tieChecker(tieCheckerString, testLevel, r, c)) {
-            board.finishActivity(context, true, "Tie")
+            if (Board.isInstructionalGame) {
+                showClosingAlertDialog(actualLevel, "")
+            } else {
+                board.finishActivity(context, true, "Tie")
+            }
             winOrTie = true
         }
 

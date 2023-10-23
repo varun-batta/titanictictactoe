@@ -27,10 +27,6 @@
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".Instructions"
-            android:configChanges="keyboardHidden|orientation|screenSize"
-            android:screenOrientation="portrait" />
-        <activity
             android:name=".PlayerSelector"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:screenOrientation="portrait" />
